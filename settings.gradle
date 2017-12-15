@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-include ':sh1106'
+include ':driver-sh1106'

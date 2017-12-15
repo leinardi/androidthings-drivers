@@ -35,7 +35,7 @@ dependencies {
 <!-- DRIVER_LIST_START -->
 Driver | Type | Usage (add to your gradle dependencies) | Note
 :---:|:---:| --- | ---
-[driver-sh1106](sh1106) | OLED display | `implementation 'com.leinardi.androidthings:driver-sh1106:0.1'` | [sample](https://github.com/androidthings/drivers-samples/tree/master/ssd1306) [changelog](ssd1306/CHANGELOG.md)
+[driver-sh1106](driver-sh1106) | OLED display | `implementation 'com.leinardi.androidthings:driver-sh1106:0.1'` | [sample](https://github.com/androidthings/drivers-samples/tree/master/driver-sh1106) [changelog](driver-sh1106/CHANGELOG.md)
 <!-- DRIVER_LIST_END -->
 
 ## License
