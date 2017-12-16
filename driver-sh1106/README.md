@@ -1,5 +1,8 @@
-SH1106 display driver for Android Things
-=========================================
+# SH1106 display driver for Android Things
+
+[![Bintray](https://img.shields.io/bintray/v/leinardi/androidthings/driver-sh1106.svg?style=plastic)](https://bintray.com/leinardi/androidthings/driver-sh1106)
+[![Build Status](https://img.shields.io/travis/leinardi/androidthings-drivers/master.svg?style=plastic)](https://travis-ci.org/leinardi/androidthings-drivers)
+[![GitHub license](https://img.shields.io/github/license/leinardi/androidthings-drivers.svg?style=plastic)](https://github.com/leinardi/androidthings-drivers/blob/master/LICENSE)
 
 This driver supports OLED screen peripherals built on the SH1106 chip.
 
@@ -10,8 +13,7 @@ of correctness, completeness or robustness.
 
 This driver is based on the [SSD1306 display driver for Android Things](https://github.com/androidthings/contrib-drivers/tree/master/ssd1306) 
 
-How to use the driver
----------------------
+## How to use the driver
 
 ### Gradle dependency
 
@@ -20,7 +22,7 @@ where `<version>` matches the last version of the driver available on [jcenter][
 
 ```
 dependencies {
-    compile 'com.leinardi.androidthings:driver-sh1106:<version>'
+    implementation 'com.leinardi.androidthings:driver-sh1106:<version>'
 }
 ```
 
@@ -64,8 +66,7 @@ try {
 }
 ```
 
-License
--------
+## License
 
 Copyright 2017 Roberto Leinardi
 
