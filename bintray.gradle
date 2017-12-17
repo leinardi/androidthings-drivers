@@ -1,5 +1,3 @@
-apply plugin: 'com.jfrog.bintray'
-
 /*
  * Copyright 2017 Roberto Leinardi.
  *
@@ -15,6 +13,8 @@ apply plugin: 'com.jfrog.bintray'
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+apply plugin: 'com.jfrog.bintray'
 
 group mvn_config.group_id
 version mvn_config.version

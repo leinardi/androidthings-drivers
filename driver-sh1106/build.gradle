@@ -15,31 +15,25 @@
  */
 
 apply plugin: 'com.android.library'
-apply plugin: 'com.leinardi.android.checkstyle'
-
-checkstyle {
-    ignoreFailures = false // Whether this task will ignore failures and continue running the build.
-    configFile rootProject.file('config/checkstyle/checkstyle.xml')
-    // The Checkstyle configuration file to use.
-    toolVersion = '8.4' // The version of Checkstyle you want to be used
-}
+apply from: rootProject.file('checkstyle.gradle')
 
 android {
     compileSdkVersion build_versions.target_sdk
     buildToolsVersion build_versions.build_tools
 
+    apply from: 'mavenConfig.gradle'
+
     defaultConfig {
         minSdkVersion 24
         targetSdkVersion build_versions.target_sdk
-        versionCode 1
-        versionName "1.0"
+        versionCode build_versions.version_code
+        versionName mvn_config.version as String
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility build_versions.java_version
+        targetCompatibility build_versions.java_version
     }
 
     buildTypes {
@@ -59,5 +53,3 @@ dependencies {
     testImplementation deps.powermock.module_junit4
     testImplementation deps.powermock.api_mockito
 }
-
-apply from: 'mavenConfig.gradle'
