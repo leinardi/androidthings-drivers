@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-apply plugin: 'com.android.library'
+apply plugin: 'com.android.application'
 apply from: rootProject.file('checkstyle.gradle')
 
 android {
     compileSdkVersion build_versions.target_sdk
     buildToolsVersion build_versions.build_tools
 
-    apply from: 'mavenConfig.gradle'
-
     defaultConfig {
+        applicationId "com.leinardi.androidthings.sh1106.sample"
         minSdkVersion build_versions.min_sdk
         targetSdkVersion build_versions.target_sdk
         versionCode build_versions.version_code
-        versionName mvn_config.version as String
+        versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
     }
 
     compileOptions {
@@ -46,10 +46,9 @@ android {
 }
 
 dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
     compileOnly deps.androidthings
     implementation deps.support.annotations
+    implementation 'com.leinardi.androidthings:driver-sh1106:0.1'
 
-    testImplementation deps.androidthings
-    testImplementation deps.powermock.module_junit4
-    testImplementation deps.powermock.api_mockito
 }
