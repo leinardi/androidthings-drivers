@@ -23,6 +23,8 @@ import com.google.android.things.pio.I2cDevice;
 import com.google.android.things.pio.PeripheralManagerService;
 
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Driver for controlling the hd44780 LCD via the PCF8574's I2C.
@@ -517,6 +519,7 @@ public class Hd44780 implements AutoCloseable {
         }
     }
 
+    @Retention(RetentionPolicy.SOURCE)
     @IntDef({Geometry.LCD_8X1, Geometry.LCD_16X2, Geometry.LCD_20X2, Geometry.LCD_20X4})
     public @interface Geometry {
         int LCD_8X1 = 0;
