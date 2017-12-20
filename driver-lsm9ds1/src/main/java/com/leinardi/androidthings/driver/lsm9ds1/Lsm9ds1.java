@@ -193,29 +193,29 @@ public class Lsm9ds1 implements Closeable {
         mMagDevice = magDevice;
 
         // soft reset & reboot accel/gyro
-        writeReg(SensorType.XG, LSM9DS1_REGISTER_CTRL_REG8, (byte) 0x05);
+        writeRegByte(SensorType.XG, LSM9DS1_REGISTER_CTRL_REG8, (byte) 0x05);
         // soft reset & reboot magnetometer
-        writeReg(SensorType.MAG, LSM9DS1_REGISTER_CTRL_REG2_M, (byte) 0x0C);
+        writeRegByte(SensorType.MAG, LSM9DS1_REGISTER_CTRL_REG2_M, (byte) 0x0C);
 
         SystemClock.sleep(10);
 
-        byte idXg = readReg(SensorType.XG, LSM9DS1_REGISTER_WHO_AM_I_XG);
-        byte idMag = readReg(SensorType.MAG, LSM9DS1_REGISTER_WHO_AM_I_M);
+        byte idXg = readRegByte(SensorType.XG, LSM9DS1_REGISTER_WHO_AM_I_XG);
+        byte idMag = readRegByte(SensorType.MAG, LSM9DS1_REGISTER_WHO_AM_I_M);
         if (idXg != LSM9DS1_XG_ID || idMag != LSM9DS1_MAG_ID) {
             throw new IllegalStateException("Could not find LSM9DS1, check wiring!");
         }
 
         // enable gyro continuous
-        writeReg(SensorType.XG, LSM9DS1_REGISTER_CTRL_REG1_G, (byte) 0xC0); // on XYZ
+        writeRegByte(SensorType.XG, LSM9DS1_REGISTER_CTRL_REG1_G, (byte) 0xC0); // on XYZ
 
         // Enable the accelerometer continuous
-        writeReg(SensorType.XG, LSM9DS1_REGISTER_CTRL_REG5_XL, (byte) 0x38); // enable X Y and Z axis
-        writeReg(SensorType.XG, LSM9DS1_REGISTER_CTRL_REG6_XL, (byte) 0xC0); // 1 KHz out data rate, BW set by ODR, 408Hz anti-aliasing
+        writeRegByte(SensorType.XG, LSM9DS1_REGISTER_CTRL_REG5_XL, (byte) 0x38); // enable X Y and Z axis
+        writeRegByte(SensorType.XG, LSM9DS1_REGISTER_CTRL_REG6_XL, (byte) 0xC0); // 1 KHz out data rate, BW set by ODR, 408Hz anti-aliasing
 
         // enable mag continuous
-        //writeReg(SensorType.MAG, LSM9DS1_REGISTER_CTRL_REG1_M, (byte) 0xFC); // high perf XY, 80 Hz ODR
-        writeReg(SensorType.MAG, LSM9DS1_REGISTER_CTRL_REG3_M, (byte) 0x00); // continuous mode
-        //writeReg(SensorType.MAG, LSM9DS1_REGISTER_CTRL_REG4_M, (byte) 0x0C); // high perf Z mode
+        //writeRegByte(SensorType.MAG, LSM9DS1_REGISTER_CTRL_REG1_M, (byte) 0xFC); // high perf XY, 80 Hz ODR
+        writeRegByte(SensorType.MAG, LSM9DS1_REGISTER_CTRL_REG3_M, (byte) 0x00); // continuous mode
+        //writeRegByte(SensorType.MAG, LSM9DS1_REGISTER_CTRL_REG4_M, (byte) 0x0C); // high perf Z mode
 
         // Set default ranges for the various sensors
         setAccelerometerRange(LSM9DS1_ACCELRANGE_2G);
@@ -225,7 +225,7 @@ public class Lsm9ds1 implements Closeable {
 
     private byte getStatusRegister(@SensorType int type) throws IOException {
         int reg = type == SensorType.XG ? LSM9DS1_REGISTER_STATUS_REG : LSM9DS1_REGISTER_STATUS_REG_M;
-        return readReg(type, reg);
+        return readRegByte(type, reg);
     }
 
     /**
@@ -304,7 +304,7 @@ public class Lsm9ds1 implements Closeable {
      * @throws IOException
      */
     public int getAccelerometerRange() throws IOException {
-        byte reg = readReg(SensorType.XG, LSM9DS1_REGISTER_CTRL_REG6_XL);
+        byte reg = readRegByte(SensorType.XG, LSM9DS1_REGISTER_CTRL_REG6_XL);
         return (reg & 0b00011000) & 0xFF;
     }
 
@@ -315,10 +315,10 @@ public class Lsm9ds1 implements Closeable {
      * @throws IOException
      */
     public void setAccelerometerRange(@AccelerometerRange int range) throws IOException {
-        byte reg = readReg(SensorType.XG, LSM9DS1_REGISTER_CTRL_REG6_XL);
+        byte reg = readRegByte(SensorType.XG, LSM9DS1_REGISTER_CTRL_REG6_XL);
         reg &= ~(0b00011000);
         reg |= range;
-        writeReg(SensorType.XG, LSM9DS1_REGISTER_CTRL_REG6_XL, reg);
+        writeRegByte(SensorType.XG, LSM9DS1_REGISTER_CTRL_REG6_XL, reg);
 
         switch (range) {
             case LSM9DS1_ACCELRANGE_2G:
@@ -342,7 +342,7 @@ public class Lsm9ds1 implements Closeable {
      * @throws IOException
      */
     public int getMagnetometerGain() throws IOException {
-        byte reg = readReg(SensorType.MAG, LSM9DS1_REGISTER_CTRL_REG2_M);
+        byte reg = readRegByte(SensorType.MAG, LSM9DS1_REGISTER_CTRL_REG2_M);
         return (reg & 0b01100000) & 0xFF;
     }
 
@@ -353,10 +353,10 @@ public class Lsm9ds1 implements Closeable {
      * @throws IOException
      */
     private void setMagnetometerGain(@MagnetometerGain int gain) throws IOException {
-        byte reg = readReg(SensorType.MAG, LSM9DS1_REGISTER_CTRL_REG2_M);
+        byte reg = readRegByte(SensorType.MAG, LSM9DS1_REGISTER_CTRL_REG2_M);
         reg &= ~(0b01100000);
         reg |= gain;
-        writeReg(SensorType.MAG, LSM9DS1_REGISTER_CTRL_REG2_M, reg);
+        writeRegByte(SensorType.MAG, LSM9DS1_REGISTER_CTRL_REG2_M, reg);
 
         switch (gain) {
             case LSM9DS1_MAGGAIN_4GAUSS:
@@ -380,7 +380,7 @@ public class Lsm9ds1 implements Closeable {
      * @throws IOException
      */
     public int getGyroscopeScale() throws IOException {
-        byte reg = readReg(SensorType.XG, LSM9DS1_REGISTER_CTRL_REG1_G);
+        byte reg = readRegByte(SensorType.XG, LSM9DS1_REGISTER_CTRL_REG1_G);
         return (reg & 0b00110000) & 0xFF;
     }
 
@@ -391,10 +391,10 @@ public class Lsm9ds1 implements Closeable {
      * @throws IOException
      */
     private void setGyroscopeScale(@GyroscopeScale int scale) throws IOException {
-        byte reg = readReg(SensorType.XG, LSM9DS1_REGISTER_CTRL_REG1_G);
+        byte reg = readRegByte(SensorType.XG, LSM9DS1_REGISTER_CTRL_REG1_G);
         reg &= ~(0b00110000);
         reg |= scale;
-        writeReg(SensorType.XG, LSM9DS1_REGISTER_CTRL_REG1_G, reg);
+        writeRegByte(SensorType.XG, LSM9DS1_REGISTER_CTRL_REG1_G, reg);
 
         switch (scale) {
             case LSM9DS1_GYROSCALE_245DPS:
@@ -409,34 +409,109 @@ public class Lsm9ds1 implements Closeable {
         }
     }
 
-    public void getRawAccelerometerData() {
-
+    /**
+     * Read the raw accelerometer sensor values.
+     * <p>
+     * If you want the acceleration in SI units (m/s^2) use the {@link #getAcceleration()}
+     *
+     * @return an integer array containing X, Y, Z axis raw values
+     * @throws IOException
+     */
+    public int[] getRawAccelerometerData() throws IOException {
+        byte[] buffer = new byte[6];
+        int[] result = new int[3];
+        readRegBuffer(SensorType.XG, LSM9DS1_REGISTER_OUT_X_L_XL, buffer, buffer.length);
+        result[0] = (buffer[1] << 8) | buffer[0]; // Store x-axis values
+        result[1] = (buffer[3] << 8) | buffer[2]; // Store y-axis values
+        result[2] = (buffer[5] << 8) | buffer[4]; // Store z-axis values
+        return result;
     }
 
-    public void getAccelerometerData() {
-
+    /**
+     * Get the acceleration on the X, Y, Z axis in SI units (m/s^2).
+     *
+     * @return a float array containing X, Y, Z axis values in SI units (m/s^2)
+     * @throws IOException
+     */
+    public float[] getAcceleration() throws IOException {
+        int[] rawAccelerometerData = getRawAccelerometerData();
+        float[] result = new float[3];
+        for (int i = 0; i < rawAccelerometerData.length; i++) {
+            result[i] = rawAccelerometerData[i] * mAccelMgLsb / 1000f * mGravity;
+        }
+        return result;
     }
 
-    public void getRawMagnetometerData() {
-
+    /**
+     * Read the raw magnetometer sensor values.
+     * <p>
+     * If you want the magnetic induction in SI units (Gs) use the {@link #getMagneticInduction()}
+     *
+     * @return an integer array containing X, Y, Z axis raw values
+     * @throws IOException
+     */
+    public int[] getRawMagnetometerData() throws IOException {
+        byte[] buffer = new byte[6];
+        int[] result = new int[3];
+        readRegBuffer(SensorType.MAG, LSM9DS1_REGISTER_OUT_X_L_M, buffer, buffer.length);
+        result[0] = (buffer[1] << 8) | buffer[0]; // Store x-axis values
+        result[1] = (buffer[3] << 8) | buffer[2]; // Store y-axis values
+        result[2] = (buffer[5] << 8) | buffer[4]; // Store z-axis values
+        return result;
     }
 
-    public void getMagnetometerData() {
-
+    /**
+     * Get the magnetic induction on the X, Y, Z axis in SI units (Gs).
+     *
+     * @return a float array containing X, Y, Z axis values in SI units (Gs)
+     * @throws IOException
+     */
+    public float[] getMagneticInduction() throws IOException {
+        int[] rawMagnetometerData = getRawMagnetometerData();
+        float[] result = new float[3];
+        for (int i = 0; i < rawMagnetometerData.length; i++) {
+            result[i] = rawMagnetometerData[i] * mMagMgaussLsb / 1000f;
+        }
+        return result;
     }
 
-    public void getRawGyroscopeData() {
-
+    /**
+     * Read the raw gyroscope sensor values.
+     * <p>
+     * If you want the angular velocity in SI units (deg/s) use the {@link #getAngularVelocity()}
+     *
+     * @return an integer array containing X, Y, Z axis raw values
+     * @throws IOException
+     */
+    public int[] getRawGyroscopeData() throws IOException {
+        byte[] buffer = new byte[6];
+        int[] result = new int[3];
+        readRegBuffer(SensorType.XG, LSM9DS1_REGISTER_OUT_X_L_G, buffer, buffer.length);
+        result[0] = (buffer[1] << 8) | buffer[0]; // Store x-axis values
+        result[1] = (buffer[3] << 8) | buffer[2]; // Store y-axis values
+        result[2] = (buffer[5] << 8) | buffer[4]; // Store z-axis values
+        return result;
     }
 
-    public void getGyroscopeData() {
-
+    /**
+     * Get the angular velocity on the X, Y, Z axis in SI units (deg/s).
+     *
+     * @return a float array containing X, Y, Z axis values in SI units (deg/s)
+     * @throws IOException
+     */
+    public float[] getAngularVelocity() throws IOException {
+        int[] rawGyroscopeData = getRawGyroscopeData();
+        float[] result = new float[3];
+        for (int i = 0; i < rawGyroscopeData.length; i++) {
+            result[i] = rawGyroscopeData[i] * mGyroDpsDigit;
+        }
+        return result;
     }
 
     /**
      * Read the Temperature data output register.
      * {@link #LSM9DS1_REGISTER_TEMP_OUT_L} and {@link #LSM9DS1_REGISTER_TEMP_OUT_H} registers together
-     * express a 16-bit word in two's complement right-justified.
+     * express a 16-bit word in two's complement right-justified quoted at 16 LSB/⁰C.
      *
      * @return raw data temperature
      * @throws IOException
@@ -449,6 +524,10 @@ public class Lsm9ds1 implements Closeable {
 
     /**
      * Get the temperature of the sensor in degrees Celsius.
+     * <p>
+     * The intent of the temperature sensor is to keep track of the (gyro) die
+     * temperature and compensate if necessary. It is not intended as an
+     * environmental sensor.
      *
      * @return the temperature in degrees Celsius
      * @throws IOException
@@ -492,7 +571,15 @@ public class Lsm9ds1 implements Closeable {
         }
     }
 
-    private byte readReg(@SensorType int sensorType, int reg) throws IOException {
+    /**
+     * Read a byte from a given register.
+     *
+     * @param sensorType The sensor to read from (see {@link SensorType}).
+     * @param reg        The register to read from (0x00-0xFF).
+     * @return The value read from the device.
+     * @throws IOException
+     */
+    private byte readRegByte(@SensorType int sensorType, int reg) throws IOException {
         if (sensorType == SensorType.MAG) {
             if (mMagDevice == null) {
                 throw new IllegalStateException("I2C device not open");
@@ -506,21 +593,15 @@ public class Lsm9ds1 implements Closeable {
         }
     }
 
-    private void writeReg(@SensorType int sensorType, int reg, byte data) throws IOException {
-        if (sensorType == SensorType.MAG) {
-            if (mMagDevice == null) {
-                throw new IllegalStateException("I2C device not open");
-            }
-            mMagDevice.writeRegByte(reg, data);
-        } else {
-            if (mAccelGyroDevice == null) {
-                throw new IllegalStateException("I2C device not open");
-            }
-            mAccelGyroDevice.writeRegByte(reg, data);
-        }
-
-    }
-
+    /**
+     * Read multiple bytes from a given register.
+     *
+     * @param sensorType The sensor to read from (see {@link SensorType})
+     * @param buffer     Buffer to read data into.
+     * @param length     Number of bytes to read, may not be larger than the buffer size.
+     * @return The value read from the device.
+     * @throws IOException
+     */
     private void readRegBuffer(@SensorType int sensorType, int reg, byte[] buffer, int length) throws IOException {
         if (sensorType == SensorType.MAG) {
             if (mMagDevice == null) {
@@ -533,6 +614,28 @@ public class Lsm9ds1 implements Closeable {
             }
             mAccelGyroDevice.readRegBuffer(reg, buffer, length);
         }
+    }
+
+    /**
+     * Write a byte to a given register.
+     *
+     * @param sensorType The sensor to write to (see {@link SensorType})
+     * @param reg        The register to write to (0x00-0xFF).
+     * @throws IOException
+     */
+    private void writeRegByte(@SensorType int sensorType, int reg, byte data) throws IOException {
+        if (sensorType == SensorType.MAG) {
+            if (mMagDevice == null) {
+                throw new IllegalStateException("I2C device not open");
+            }
+            mMagDevice.writeRegByte(reg, data);
+        } else {
+            if (mAccelGyroDevice == null) {
+                throw new IllegalStateException("I2C device not open");
+            }
+            mAccelGyroDevice.writeRegByte(reg, data);
+        }
+
     }
 
     // Accelerometer range
