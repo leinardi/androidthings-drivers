@@ -14,4 +14,27 @@
  * limitations under the License.
  */
 
-include ':driver-sh1106', ':sample-sh1106', ':driver-pcf8574-hd44780', ':sample-pcf8574-hd44780', ':driver-lsm9ds1', ':sample-lsm9ds1'
+package com.leinardi.androidthings.driver.lsm9ds1;
+
+import com.google.android.things.pio.I2cDevice;
+import org.junit.Rule;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
+import org.powermock.modules.junit4.PowerMockRunner;
+
+@RunWith(PowerMockRunner.class)
+public class Lsm9ds1Test {
+
+    @Mock
+    I2cDevice mI2c;
+
+    @Rule
+    public MockitoRule mMokitoRule = MockitoJUnit.rule();
+
+    @Rule
+    public ExpectedException mExpectedException = ExpectedException.none();
+
+}
