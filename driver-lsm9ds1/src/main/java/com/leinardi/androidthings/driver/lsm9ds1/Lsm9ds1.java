@@ -103,8 +103,8 @@ public class Lsm9ds1 implements Closeable {
     private static final int REGISTER_OUT_X_H_XL = 0x29;
     private static final int REGISTER_OUT_Y_L_XL = 0x2A;
     private static final int REGISTER_OUT_Y_H_XL = 0x2B;
-    private static final int REGISTER_OUT_Z_H_XL = 0x2D;
     private static final int REGISTER_OUT_Z_L_XL = 0x2C;
+    private static final int REGISTER_OUT_Z_H_XL = 0x2D;
     private static final int REGISTER_FIFO_CTRL = 0x2E;
     private static final int REGISTER_FIFO_SRC = 0x2F;
     // Magnetometer registers
@@ -143,45 +143,45 @@ public class Lsm9ds1 implements Closeable {
     private static final int MAGDATARATE_50HZ = 4 << 2;
     private static final int MAGDATARATE_100HZ = 5 << 2;
     // STATUS_REG
-    private static final byte STATUS_REG_IG_XL = 0b01000000;
-    private static final byte STATUS_REG_IG_G = 0b00100000;
-    private static final byte STATUS_REG_INACT = 0b00010000;
-    private static final byte STATUS_REG_BOOT_STATUS = 0b00001000;
-    private static final byte STATUS_REG_TDA = 0b00000100;
-    private static final byte STATUS_REG_GDA = 0b00000010;
-    private static final byte STATUS_REG_XLDA = 0b00000001;
+    private static final int STATUS_REG_IG_XL = 0b01000000;
+    private static final int STATUS_REG_IG_G = 0b00100000;
+    private static final int STATUS_REG_INACT = 0b00010000;
+    private static final int STATUS_REG_BOOT_STATUS = 0b00001000;
+    private static final int STATUS_REG_TDA = 0b00000100;
+    private static final int STATUS_REG_GDA = 0b00000010;
+    private static final int STATUS_REG_XLDA = 0b00000001;
     // STATUS_REG_M
-    private static final byte STATUS_REG_M_ZYXOR = (byte) 0b10000000;
-    private static final byte STATUS_REG_M_ZOR = 0b01000000;
-    private static final byte STATUS_REG_M_YOR = 0b00100000;
-    private static final byte STATUS_REG_M_XOR = 0b00010000;
-    private static final byte STATUS_REG_M_ZYXDA = 0b00001000;
-    private static final byte STATUS_REG_M_ZDA = 0b00000100;
-    private static final byte STATUS_REG_M_YDA = 0b00000010;
-    private static final byte STATUS_REG_M_XDA = 0b00000001;
+    private static final int STATUS_REG_M_ZYXOR = 0b10000000;
+    private static final int STATUS_REG_M_ZOR = 0b01000000;
+    private static final int STATUS_REG_M_YOR = 0b00100000;
+    private static final int STATUS_REG_M_XOR = 0b00010000;
+    private static final int STATUS_REG_M_ZYXDA = 0b00001000;
+    private static final int STATUS_REG_M_ZDA = 0b00000100;
+    private static final int STATUS_REG_M_YDA = 0b00000010;
+    private static final int STATUS_REG_M_XDA = 0b00000001;
 
-    public static final byte CTRL_REG5_XL_ZEN_XL = 0b00100000;
-    public static final byte CTRL_REG5_XL_YEN_XL = 0b00010000;
-    public static final byte CTRL_REG5_XL_XEN_XL = 0b00001000;
-    public static final byte ORIENT_CFG_G_SIGN_X_G = 0b00100000;
-    public static final byte ORIENT_CFG_G_SIGN_Y_G = 0b00010000;
-    public static final byte ORIENT_CFG_G_SIGN_Z_G = 0b00001000;
-    private static final byte CTRL_REG7_XL_HR = (byte) 0b10000000;
+    public static final int CTRL_REG5_XL_ZEN_XL = 0b00100000;
+    public static final int CTRL_REG5_XL_YEN_XL = 0b00010000;
+    public static final int CTRL_REG5_XL_XEN_XL = 0b00001000;
+    public static final int ORIENT_CFG_G_SIGN_X_G = 0b00100000;
+    public static final int ORIENT_CFG_G_SIGN_Y_G = 0b00010000;
+    public static final int ORIENT_CFG_G_SIGN_Z_G = 0b00001000;
+    private static final int CTRL_REG7_XL_HR = 0b10000000;
     // CTRL_REG8
-    private static final byte CTRL_REG8_BOOT = (byte) 0b10000000;
-    private static final byte CTRL_REG8_BDU = 0b01000000;
-    private static final byte CTRL_REG8_H_LACTIVE = 0b00100000;
-    private static final byte CTRL_REG8_PP_OD = 0b00010000;
-    private static final byte CTRL_REG8_SIM = 0b00001000;
-    private static final byte CTRL_REG8_IF_ADD_INC = 0b00000100;
-    private static final byte CTRL_REG8_BLE = 0b00000010;
-    private static final byte CTRL_REG8_SW_RESET = 0b00000001;
+    private static final int CTRL_REG8_BOOT = 0b10000000;
+    private static final int CTRL_REG8_BDU = 0b01000000;
+    private static final int CTRL_REG8_H_LACTIVE = 0b00100000;
+    private static final int CTRL_REG8_PP_OD = 0b00010000;
+    private static final int CTRL_REG8_SIM = 0b00001000;
+    private static final int CTRL_REG8_IF_ADD_INC = 0b00000100;
+    private static final int CTRL_REG8_BLE = 0b00000010;
+    private static final int CTRL_REG8_SW_RESET = 0b00000001;
 
-    private static final byte CTRL_REG9_SLEEP_G = 0b01000000;
-    private static final byte CTRL_REG9_FIFO_EN = 0b00000010;
-    private static final byte CTRL_REG1_M_TEMP_COMP = (byte) 0b10000000;
-    private static final byte CTRL_REG2_M_REBOOT = 0b00001000;
-    private static final byte CTRL_REG2_M_SOFT_RST = 0b00000100;
+    private static final int CTRL_REG9_SLEEP_G = 0b01000000;
+    private static final int CTRL_REG9_FIFO_EN = 0b00000010;
+    private static final int CTRL_REG1_M_TEMP_COMP = 0b10000000;
+    private static final int CTRL_REG2_M_REBOOT = 0b00001000;
+    private static final int CTRL_REG2_M_SOFT_RST = 0b00000100;
 
     private static final float TEMP_LSB_DEGREE_CELSIUS = 16.0F;
     private static final float TEMP_BIAS = 27.5F; // This is an empirical estimation
@@ -305,7 +305,7 @@ public class Lsm9ds1 implements Closeable {
      * @throws IOException
      */
     public boolean isTemperatureNewDataAvailable() throws IOException {
-        return (getStatusRegister(SENSOR_XG) & STATUS_REG_TDA) == STATUS_REG_TDA;
+        return ((getStatusRegister(SENSOR_XG) & 0xFF) & STATUS_REG_TDA) == STATUS_REG_TDA;
     }
 
     /**
@@ -315,7 +315,7 @@ public class Lsm9ds1 implements Closeable {
      * @throws IOException
      */
     public boolean isAccelerometerNewDataAvailable() throws IOException {
-        return (getStatusRegister(SENSOR_XG) & STATUS_REG_XLDA) == STATUS_REG_XLDA;
+        return ((getStatusRegister(SENSOR_XG) & 0xFF) & STATUS_REG_XLDA) == STATUS_REG_XLDA;
     }
 
     /**
@@ -325,7 +325,7 @@ public class Lsm9ds1 implements Closeable {
      * @throws IOException
      */
     public boolean isGyroscopeNewDataAvailable() throws IOException {
-        return (getStatusRegister(SENSOR_XG) & STATUS_REG_GDA) == STATUS_REG_GDA;
+        return ((getStatusRegister(SENSOR_XG) & 0xFF) & STATUS_REG_GDA) == STATUS_REG_GDA;
     }
 
     /**
@@ -335,7 +335,7 @@ public class Lsm9ds1 implements Closeable {
      * @throws IOException
      */
     public boolean isMagnetometerXYZAxesNewDataAvailable() throws IOException {
-        return (getStatusRegister(SENSOR_MAG) & STATUS_REG_M_ZYXDA) == STATUS_REG_M_ZYXDA;
+        return ((getStatusRegister(SENSOR_MAG) & 0xFF) & STATUS_REG_M_ZYXDA) == STATUS_REG_M_ZYXDA;
     }
 
     /**
@@ -345,7 +345,7 @@ public class Lsm9ds1 implements Closeable {
      * @throws IOException
      */
     public boolean isMagnetometerXAxisNewDataAvailable() throws IOException {
-        return (getStatusRegister(SENSOR_MAG) & STATUS_REG_M_XDA) == STATUS_REG_M_XDA;
+        return ((getStatusRegister(SENSOR_MAG) & 0xFF) & STATUS_REG_M_XDA) == STATUS_REG_M_XDA;
     }
 
     /**
@@ -355,7 +355,7 @@ public class Lsm9ds1 implements Closeable {
      * @throws IOException
      */
     public boolean isMagnetometerYAxisNewDataAvailable() throws IOException {
-        return (getStatusRegister(SENSOR_MAG) & STATUS_REG_M_YDA) == STATUS_REG_M_YDA;
+        return ((getStatusRegister(SENSOR_MAG) & 0xFF) & STATUS_REG_M_YDA) == STATUS_REG_M_YDA;
     }
 
     /**
@@ -365,7 +365,7 @@ public class Lsm9ds1 implements Closeable {
      * @throws IOException
      */
     public boolean isMagnetometerZAxisNewDataAvailable() throws IOException {
-        return (getStatusRegister(SENSOR_MAG) & STATUS_REG_M_ZDA) == STATUS_REG_M_ZDA;
+        return ((getStatusRegister(SENSOR_MAG) & 0xFF) & STATUS_REG_M_ZDA) == STATUS_REG_M_ZDA;
     }
 
     /**
@@ -811,9 +811,9 @@ public class Lsm9ds1 implements Closeable {
         byte[] buffer = new byte[6];
         int[] result = new int[3];
         readRegBuffer(SENSOR_XG, REGISTER_OUT_X_L_XL, buffer, buffer.length);
-        result[0] = (buffer[1] << 8) | buffer[0]; // Store x-axis values
-        result[1] = (buffer[3] << 8) | buffer[2]; // Store y-axis values
-        result[2] = (buffer[5] << 8) | buffer[4]; // Store z-axis values
+        result[0] = (((int) buffer[1]) << 8) | (buffer[0] & 0xFF); // Store x-axis values
+        result[1] = (((int) buffer[3]) << 8) | (buffer[2] & 0xFF); // Store y-axis values
+        result[2] = (((int) buffer[5]) << 8) | (buffer[4] & 0xFF); // Store z-axis values
         return result;
     }
 
@@ -844,9 +844,9 @@ public class Lsm9ds1 implements Closeable {
         byte[] buffer = new byte[6];
         int[] result = new int[3];
         readRegBuffer(SENSOR_MAG, REGISTER_OUT_X_L_M, buffer, buffer.length);
-        result[0] = (buffer[1] << 8) | buffer[0]; // Store x-axis values
-        result[1] = (buffer[3] << 8) | buffer[2]; // Store y-axis values
-        result[2] = (buffer[5] << 8) | buffer[4]; // Store z-axis values
+        result[0] = (((int) buffer[1]) << 8) | (buffer[0] & 0xFF); // Store x-axis values
+        result[1] = (((int) buffer[3]) << 8) | (buffer[2] & 0xFF); // Store y-axis values
+        result[2] = (((int) buffer[5]) << 8) | (buffer[4] & 0xFF); // Store z-axis values
         return result;
     }
 
@@ -877,9 +877,9 @@ public class Lsm9ds1 implements Closeable {
         byte[] buffer = new byte[6];
         int[] result = new int[3];
         readRegBuffer(SENSOR_XG, REGISTER_OUT_X_L_G, buffer, buffer.length);
-        result[0] = (buffer[1] << 8) | buffer[0]; // Store x-axis values
-        result[1] = (buffer[3] << 8) | buffer[2]; // Store y-axis values
-        result[2] = (buffer[5] << 8) | buffer[4]; // Store z-axis values
+        result[0] = (((int) buffer[1]) << 8) | (buffer[0] & 0xFF); // Store x-axis values
+        result[1] = (((int) buffer[3]) << 8) | (buffer[2] & 0xFF); // Store y-axis values
+        result[2] = (((int) buffer[5]) << 8) | (buffer[4] & 0xFF); // Store z-axis values
         return result;
     }
 
@@ -909,7 +909,7 @@ public class Lsm9ds1 implements Closeable {
     public int getRawTemperature() throws IOException {
         byte[] buffer = new byte[2];
         readRegBuffer(SENSOR_XG, REGISTER_TEMP_OUT_L, buffer, buffer.length);
-        return ((int) buffer[1] << 8) | buffer[0];
+        return ((int) buffer[1] << 8) | (buffer[0] & 0xFF);
     }
 
     /**
