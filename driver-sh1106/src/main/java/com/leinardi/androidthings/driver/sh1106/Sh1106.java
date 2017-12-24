@@ -181,7 +181,11 @@ public class Sh1106 implements Closeable {
         mWidth = width;
         mHeight = height;
         mBuffer = new byte[PAGES][(((mWidth * mHeight) / VERTICAL_PIXEL_PER_PAGE) / PAGES) + DATA_OFFSET];
-        BitmapHelper.bmpToBytes(mBuffer, DATA_OFFSET, Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888), false);
+        BitmapHelper.bmpToBytes(
+                mBuffer,
+                DATA_OFFSET,
+                Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888),
+                false);
         for (byte[] page : mBuffer) {
             page[0] = (byte) COMMAND_DISPLAY_START_LINE;
         }
