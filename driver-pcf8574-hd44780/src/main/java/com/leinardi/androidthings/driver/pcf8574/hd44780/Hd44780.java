@@ -23,6 +23,8 @@ import com.google.android.things.pio.I2cDevice;
 import com.google.android.things.pio.PeripheralManagerService;
 
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Driver for controlling the hd44780 LCD via the PCF8574's I2C.
@@ -357,7 +359,8 @@ public class Hd44780 implements AutoCloseable {
      * @throws IOException
      */
     public void setBacklight(boolean enable) throws IOException {
-        // The current brightness is stored in the private backlight variable to have it available for further data transfers.
+        // The current brightness is stored in the private backlight variable to have it available for further data
+        // transfers.
         mBacklight = enable;
         // send no data but set the background-pin right;
         write2Wire((byte) 0x00, RSMODE_DATA, false);
@@ -517,6 +520,7 @@ public class Hd44780 implements AutoCloseable {
         }
     }
 
+    @Retention(RetentionPolicy.SOURCE)
     @IntDef({Geometry.LCD_8X1, Geometry.LCD_16X2, Geometry.LCD_20X2, Geometry.LCD_20X4})
     public @interface Geometry {
         int LCD_8X1 = 0;

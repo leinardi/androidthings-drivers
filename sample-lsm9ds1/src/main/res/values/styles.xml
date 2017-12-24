@@ -14,12 +14,9 @@
   ~ limitations under the License.
   -->
 
-<manifest package="com.leinardi.androidthings.driver.pcf8574.hd44780"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<resources>
 
-    <application>
-        <uses-library
-            android:name="com.google.android.things"
-            android:required="false" />
-    </application>
-</manifest>
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="android:Theme.Material.Light.DarkActionBar" />
+
+</resources>
