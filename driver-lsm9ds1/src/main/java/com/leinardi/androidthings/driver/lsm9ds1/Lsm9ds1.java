@@ -58,17 +58,21 @@ import static com.leinardi.androidthings.driver.lsm9ds1.Lsm9ds1.MagnetometerGain
 import static com.leinardi.androidthings.driver.lsm9ds1.Lsm9ds1.MagnetometerGain.MAG_GAIN_16GAUSS;
 import static com.leinardi.androidthings.driver.lsm9ds1.Lsm9ds1.MagnetometerGain.MAG_GAIN_4GAUSS;
 import static com.leinardi.androidthings.driver.lsm9ds1.Lsm9ds1.MagnetometerGain.MAG_GAIN_8GAUSS;
-import static com.leinardi.androidthings.driver.lsm9ds1.Lsm9ds1.MagnetometerSystemOperatingMode.MAG_CONTINUOUS_CONVERSION;
+import static com.leinardi.androidthings.driver.lsm9ds1.Lsm9ds1.MagnetometerSystemOperatingMode
+        .MAG_CONTINUOUS_CONVERSION;
 import static com.leinardi.androidthings.driver.lsm9ds1.Lsm9ds1.MagnetometerSystemOperatingMode.MAG_POWER_DOWN;
 import static com.leinardi.androidthings.driver.lsm9ds1.Lsm9ds1.MagnetometerSystemOperatingMode.MAG_SINGLE_CONVERSION;
 import static com.leinardi.androidthings.driver.lsm9ds1.Lsm9ds1.MagnetometerXYOperatingMode.MAG_XY_OM_HIGH_PERFORMANCE;
 import static com.leinardi.androidthings.driver.lsm9ds1.Lsm9ds1.MagnetometerXYOperatingMode.MAG_XY_OM_LOW_POWER;
-import static com.leinardi.androidthings.driver.lsm9ds1.Lsm9ds1.MagnetometerXYOperatingMode.MAG_XY_OM_MEDIUM_PERFORMANCE;
-import static com.leinardi.androidthings.driver.lsm9ds1.Lsm9ds1.MagnetometerXYOperatingMode.MAG_XY_OM_ULTRA_HIGH_PERFORMANCE;
+import static com.leinardi.androidthings.driver.lsm9ds1.Lsm9ds1.MagnetometerXYOperatingMode
+        .MAG_XY_OM_MEDIUM_PERFORMANCE;
+import static com.leinardi.androidthings.driver.lsm9ds1.Lsm9ds1.MagnetometerXYOperatingMode
+        .MAG_XY_OM_ULTRA_HIGH_PERFORMANCE;
 import static com.leinardi.androidthings.driver.lsm9ds1.Lsm9ds1.MagnetometerZOperatingMode.MAG_Z_OM_HIGH_PERFORMANCE;
 import static com.leinardi.androidthings.driver.lsm9ds1.Lsm9ds1.MagnetometerZOperatingMode.MAG_Z_OM_LOW_POWER;
 import static com.leinardi.androidthings.driver.lsm9ds1.Lsm9ds1.MagnetometerZOperatingMode.MAG_Z_OM_MEDIUM_PERFORMANCE;
-import static com.leinardi.androidthings.driver.lsm9ds1.Lsm9ds1.MagnetometerZOperatingMode.MAG_Z_OM_ULTRA_HIGH_PERFORMANCE;
+import static com.leinardi.androidthings.driver.lsm9ds1.Lsm9ds1.MagnetometerZOperatingMode
+        .MAG_Z_OM_ULTRA_HIGH_PERFORMANCE;
 import static com.leinardi.androidthings.driver.lsm9ds1.Lsm9ds1.SensorType.SENSOR_MAG;
 import static com.leinardi.androidthings.driver.lsm9ds1.Lsm9ds1.SensorType.SENSOR_XG;
 
@@ -258,7 +262,8 @@ public class Lsm9ds1 implements Closeable {
     private void resetAndReboot(@SensorType int type, boolean waitForReboot) throws IOException {
         switch (type) {
             case SENSOR_XG:
-                writeRegByte(type, REGISTER_CTRL_REG8, (byte) (CTRL_REG8_BOOT | CTRL_REG8_IF_ADD_INC | CTRL_REG8_SW_RESET));
+                writeRegByte(type, REGISTER_CTRL_REG8,
+                        (byte) (CTRL_REG8_BOOT | CTRL_REG8_IF_ADD_INC | CTRL_REG8_SW_RESET));
                 break;
             case SENSOR_MAG:
                 writeRegByte(type, REGISTER_CTRL_REG2_M, (byte) (CTRL_REG2_M_REBOOT | CTRL_REG2_M_SOFT_RST));
@@ -1495,7 +1500,8 @@ public class Lsm9ds1 implements Closeable {
          *
          * @return this Builder object to allow for chaining of calls to set methods
          */
-        public Builder setMagnetometerSystemOperatingMode(@MagnetometerSystemOperatingMode int magnetometerSystemOperatingMode) {
+        public Builder setMagnetometerSystemOperatingMode(
+                @MagnetometerSystemOperatingMode int magnetometerSystemOperatingMode) {
             mMagnetometerSystemOperatingMode = magnetometerSystemOperatingMode;
             return this;
         }

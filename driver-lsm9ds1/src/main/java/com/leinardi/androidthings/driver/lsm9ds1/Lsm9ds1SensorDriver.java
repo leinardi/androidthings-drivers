@@ -28,7 +28,8 @@ import java.util.UUID;
 
 import static com.leinardi.androidthings.driver.lsm9ds1.Lsm9ds1.AccelGyroOutputDataRate.ODR_952HZ;
 import static com.leinardi.androidthings.driver.lsm9ds1.Lsm9ds1.AccelGyroOutputDataRate.ODR_POWER_DOWN;
-import static com.leinardi.androidthings.driver.lsm9ds1.Lsm9ds1.MagnetometerSystemOperatingMode.MAG_CONTINUOUS_CONVERSION;
+import static com.leinardi.androidthings.driver.lsm9ds1.Lsm9ds1.MagnetometerSystemOperatingMode
+        .MAG_CONTINUOUS_CONVERSION;
 import static com.leinardi.androidthings.driver.lsm9ds1.Lsm9ds1.MagnetometerSystemOperatingMode.MAG_POWER_DOWN;
 
 public class Lsm9ds1SensorDriver implements AutoCloseable {
@@ -72,7 +73,10 @@ public class Lsm9ds1SensorDriver implements AutoCloseable {
      * @throws IOException
      */
     public Lsm9ds1SensorDriver(String bus, int addressAccelGyro, int addressMag) throws IOException {
-        mDevice = new Lsm9ds1.Builder(bus).setI2cAddressAccelGyro(addressAccelGyro).setI2cAddressMag(addressMag).build();
+        mDevice = new Lsm9ds1.Builder(bus)
+                .setI2cAddressAccelGyro(addressAccelGyro)
+                .setI2cAddressMag(addressMag)
+                .build();
     }
 
     /**
@@ -206,13 +210,13 @@ public class Lsm9ds1SensorDriver implements AutoCloseable {
      */
     private void maybeSleep() throws IOException {
         if (mAccelerationUserDriver == null || !mAccelerationUserDriver.isEnabled()) {              // Turn off Accel
-            if ((mAngularVelocityUserDriver == null || !mAngularVelocityUserDriver.isEnabled())     // if Gyro is off too
-                    && (mTemperatureUserDriver == null || !mTemperatureUserDriver.isEnabled())) {   // and Temp is off too
+            if ((mAngularVelocityUserDriver == null || !mAngularVelocityUserDriver.isEnabled())     // if Gyro is off
+                    && (mTemperatureUserDriver == null || !mTemperatureUserDriver.isEnabled())) {   // and Temp is off
                 mDevice.setAccelerometerOdr(ODR_POWER_DOWN);
             }
         } else {                                                                                    // Turn on Accel
             if ((mAngularVelocityUserDriver == null || !mAngularVelocityUserDriver.isEnabled())     // if Gyro is off
-                    && (mTemperatureUserDriver == null || !mTemperatureUserDriver.isEnabled())) {   // and Temp is off too
+                    && (mTemperatureUserDriver == null || !mTemperatureUserDriver.isEnabled())) {   // and Temp is off
                 mDevice.setAccelerometerOdr(ODR_952HZ);
             }
         }
@@ -228,13 +232,13 @@ public class Lsm9ds1SensorDriver implements AutoCloseable {
         }
 
         if (mTemperatureUserDriver == null || !mTemperatureUserDriver.isEnabled()) {                // Turn off Temp
-            if ((mAngularVelocityUserDriver == null || !mAngularVelocityUserDriver.isEnabled())     // if Gyro is off too
-                    && (mAccelerationUserDriver == null || !mAccelerationUserDriver.isEnabled())) { // and Accel is off too
+            if ((mAngularVelocityUserDriver == null || !mAngularVelocityUserDriver.isEnabled())     // if Gyro is off
+                    && (mAccelerationUserDriver == null || !mAccelerationUserDriver.isEnabled())) { // and Accel is off
                 mDevice.setAccelerometerOdr(ODR_POWER_DOWN);
             }
         } else {                                                                                    // Turn on Temp
             if ((mAngularVelocityUserDriver == null || !mAngularVelocityUserDriver.isEnabled())     // if Gyro is off
-                    && (mTemperatureUserDriver == null || !mTemperatureUserDriver.isEnabled())) {   // and Accel is off too
+                    && (mTemperatureUserDriver == null || !mTemperatureUserDriver.isEnabled())) {   // and Accel is off
                 mDevice.setAccelerometerOdr(ODR_952HZ);
             }
         }
@@ -391,7 +395,8 @@ public class Lsm9ds1SensorDriver implements AutoCloseable {
         // DRIVER parameters
         // documented at https://source.android.com/devices/sensors/hal-interface.html#sensor_t
         private static final float DRIVER_MAX_RANGE = Lsm9ds1.MAX_TEMP_C;
-        private static final float DRIVER_POWER = Lsm9ds1.MAX_POWER_CONSUMPTION_XM_UA / 1000.f; // The temperature is provided by the Accel
+        // The temperature is provided by the Accel
+        private static final float DRIVER_POWER = Lsm9ds1.MAX_POWER_CONSUMPTION_XM_UA / 1000.f;
         private static final int DRIVER_VERSION = 1;
         private static final String DRIVER_REQUIRED_PERMISSION = "";
 
