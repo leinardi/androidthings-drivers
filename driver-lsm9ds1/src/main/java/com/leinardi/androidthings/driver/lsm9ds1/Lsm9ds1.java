@@ -200,7 +200,7 @@ public class Lsm9ds1 implements Closeable {
     private I2cDevice mMagDevice;
 
     /**
-     * Please use the {@link Builder} to create a new LSM9DS1 sensor driver.
+     * Use the {@link Builder} to create a new LSM9DS1 sensor driver instance.
      *
      * @throws IOException
      */

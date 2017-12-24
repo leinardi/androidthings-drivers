@@ -80,6 +80,8 @@ try {
 }
 ```
 
+To use it with the `SensorManager` check the [sample project](https://github.com/leinardi/androidthings-drivers/tree/lsm9ds1/sample-lsm9ds1).
+
 ## License
 
 Copyright 2017 Roberto Leinardi
