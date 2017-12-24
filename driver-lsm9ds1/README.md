@@ -30,7 +30,55 @@ dependencies {
 
 ### Sample usage
 
-TBD
+```java
+import com.leinardi.androidthings.driver.lsm9ds1.Lsm9ds1;
+
+// Access the sensor:
+
+Lsm9ds1 mLsm9ds1;
+
+try {
+    mLsm9ds1 = new Lsm9ds1.Builder(bus) // All the following setters are optional
+        .setI2cAddressAccelGyro(Lsm9ds1.I2C_ADDRESS_ACCEL_GYRO)
+        .setI2cAddressMag(Lsm9ds1.I2C_ADDRESS_MAG)
+        .setAccelerometerDecimation(Lsm9ds1.AccelerometerDecimation.ACCEL_DEC_0_SAMPLES)
+        .setAccelerometerEnabledAxes(Lsm9ds1.CTRL_REG5_XL_ZEN_XL | Lsm9ds1.CTRL_REG5_XL_YEN_XL | Lsm9ds1.CTRL_REG5_XL_XEN_XL)
+        .setAccelerometerHighResolution(true)
+        .setAccelerometerOdr(Lsm9ds1.AccelGyroOutputDataRate.ODR_952HZ)
+        .setAccelerometerRange(Lsm9ds1.AccelerometerRange.ACCEL_RANGE_2G)
+        .setFifoMemoryEnabled(false)
+        .setFifoModeAndTreshold(Lsm9ds1.FifoMode.FIFO_OFF, Lsm9ds1.FIFO_MAX_THRESHOLD)
+        .setGyroscopeOdr(Lsm9ds1.AccelGyroOutputDataRate.ODR_952HZ)
+        .setGyroscopeScale(Lsm9ds1.GyroscopeScale.GYRO_SCALE_245DPS)
+        .setMagnetometerGain(Lsm9ds1.MagnetometerGain.MAG_GAIN_4GAUSS)
+        .setMagnetometerSystemOperatingMode(MAG_CONTINUOUS_CONVERSION)
+        .setMagnetometerTemperatureCompensation(true)
+        .setMagnetometerXYOperatingMode(Lsm9ds1.MagnetometerXYOperatingMode.MAG_XY_OM_ULTRA_HIGH_PERFORMANCE)
+        .setMagnetometerZOperatingMode(Lsm9ds1.MagnetometerZOperatingMode.MAG_Z_OM_ULTRA_HIGH_PERFORMANCE)
+        .build();
+} catch (IOException e) {
+    // couldn't configure the device...
+}
+
+// Read the current data:
+
+try {
+    float[] acceleration = mLsm9ds1.readAcceleration();
+    float[] angularVelocity = mLsm9ds1.readAngularVelocity();
+    float[] magneticInduction = mLsm9ds1.readMagneticInduction();
+    float temperature = mLsm9ds1.readTemperature();
+} catch (IOException e) {
+    // error reading data
+}
+
+// Close the sensor when finished:
+
+try {
+    mLsm9ds1.close();
+} catch (IOException e) {
+    // error closing sensor
+}
+```
 
 ## License
 

@@ -76,6 +76,25 @@ import static com.leinardi.androidthings.driver.lsm9ds1.Lsm9ds1.SensorType.SENSO
  * Driver for the LSM9DS1 3D accelerometer, 3D gyroscope, 3D magnetometer and temperature sensor.
  */
 public class Lsm9ds1 implements Closeable {
+    public static final int I2C_ADDRESS_ACCEL_GYRO = 0x6B;
+    public static final int I2C_ADDRESS_MAG = 0x1E;
+    public static final int ACCEL_AXIS_X = 0b00001000;
+    public static final int ACCEL_AXIS_Y = 0b00010000;
+    public static final int ACCEL_AXIS_Z = 0b00100000;
+    public static final int GYRO_INVERT_AXIS_X = 0b00100000;
+    public static final int GYRO_INVERT_AXIS_Y = 0b00010000;
+    public static final int GYRO_INVERT_AXIS_Z = 0b00001000;
+    public static final int FIFO_MAX_THRESHOLD = 31;
+    static final float MAX_FREQ_HZ_XG = 952f;
+    static final float MIN_FREQ_HZ_XG = 14.9f;
+    static final float MAX_FREQ_HZ_M = 80f;
+    static final float MIN_FREQ_HZ_M = 0.625f;
+    static final float MAX_POWER_CONSUMPTION_XM_UA = 600f;
+    static final float MAX_POWER_CONSUMPTION_G_UA = 4100f;
+    static final float MAX_ACCEL_RANGE_G_DEFAULT = 2f;
+    static final float MAX_GYRO_RATE_DPS_DEFAULT = 245f;
+    static final float MAX_MAG_GAIN_GS_DEFAULT = 4f;
+    static final float MAX_TEMP_C = 85f;
     private static final String TAG = Lsm9ds1.class.getSimpleName();
     // Accelerometer/Gyroscope registers
     private static final int REGISTER_WHO_AM_I_XG = 0x0F;
@@ -121,27 +140,8 @@ public class Lsm9ds1 implements Closeable {
     private static final int REGISTER_OUT_Y_H_M = 0x2B;
     private static final int REGISTER_OUT_Z_L_M = 0x2C;
     private static final int REGISTER_OUT_Z_H_M = 0x2D;
-    private static final int REGISTER_CFG_M = 0x30;
+    private static final int REGISTER_INT_CFG_M = 0x30;
     private static final int REGISTER_INT_SRC_M = 0x31;
-    // Accelerometer data rate
-    private static final int ACCELDATARATE_POWERDOWN = 0;
-    private static final int ACCELDATARATE_3_125HZ = 1 << 4;
-    private static final int ACCELDATARATE_6_25HZ = 2 << 4;
-    private static final int ACCELDATARATE_12_5HZ = 3 << 4;
-    private static final int ACCELDATARATE_25HZ = 4 << 4;
-    private static final int ACCELDATARATE_50HZ = 5 << 4;
-    private static final int ACCELDATARATE_100HZ = 6 << 4;
-    private static final int ACCELDATARATE_200HZ = 7 << 4;
-    private static final int ACCELDATARATE_400HZ = 8 << 4;
-    private static final int ACCELDATARATE_800HZ = 9 << 4;
-    private static final int ACCELDATARATE_1600HZ = 10 << 4;
-    // Magnetometer data rate
-    private static final int MAGDATARATE_3_125HZ = 0;
-    private static final int MAGDATARATE_6_25HZ = 1 << 2;
-    private static final int MAGDATARATE_12_5HZ = 2 << 2;
-    private static final int MAGDATARATE_25HZ = 3 << 2;
-    private static final int MAGDATARATE_50HZ = 4 << 2;
-    private static final int MAGDATARATE_100HZ = 5 << 2;
     // STATUS_REG
     private static final int STATUS_REG_IG_XL = 0b01000000;
     private static final int STATUS_REG_IG_G = 0b00100000;
@@ -159,13 +159,6 @@ public class Lsm9ds1 implements Closeable {
     private static final int STATUS_REG_M_ZDA = 0b00000100;
     private static final int STATUS_REG_M_YDA = 0b00000010;
     private static final int STATUS_REG_M_XDA = 0b00000001;
-
-    public static final int CTRL_REG5_XL_ZEN_XL = 0b00100000;
-    public static final int CTRL_REG5_XL_YEN_XL = 0b00010000;
-    public static final int CTRL_REG5_XL_XEN_XL = 0b00001000;
-    public static final int ORIENT_CFG_G_SIGN_X_G = 0b00100000;
-    public static final int ORIENT_CFG_G_SIGN_Y_G = 0b00010000;
-    public static final int ORIENT_CFG_G_SIGN_Z_G = 0b00001000;
     private static final int CTRL_REG7_XL_HR = 0b10000000;
     // CTRL_REG8
     private static final int CTRL_REG8_BOOT = 0b10000000;
@@ -176,35 +169,29 @@ public class Lsm9ds1 implements Closeable {
     private static final int CTRL_REG8_IF_ADD_INC = 0b00000100;
     private static final int CTRL_REG8_BLE = 0b00000010;
     private static final int CTRL_REG8_SW_RESET = 0b00000001;
-
     private static final int CTRL_REG9_SLEEP_G = 0b01000000;
     private static final int CTRL_REG9_FIFO_EN = 0b00000010;
     private static final int CTRL_REG1_M_TEMP_COMP = 0b10000000;
     private static final int CTRL_REG2_M_REBOOT = 0b00001000;
     private static final int CTRL_REG2_M_SOFT_RST = 0b00000100;
-
-    private static final float TEMP_LSB_DEGREE_CELSIUS = 16.0F;
-    private static final float TEMP_BIAS = 27.5F; // This is an empirical estimation
-    private static final int I2C_ADDRESS_ACCEL_GYRO = 0x6B;
-    private static final int I2C_ADDRESS_MAG = 0x1E;
+    private static final float TEMP_LSB_DEGREE_CELSIUS = 16f;
+    private static final float TEMP_BIAS = 27.5f; // This is an empirical estimation
     private static final byte XG_ID = 0b01101000;
     private static final byte MAG_ID = 0b00111101;
-
     // Linear Acceleration: mg per LSB
-    private static final float ACCEL_MG_LSB_2G = 0.061F;
-    private static final float ACCEL_MG_LSB_4G = 0.122F;
-    private static final float ACCEL_MG_LSB_8G = 0.244F;
-    private static final float ACCEL_MG_LSB_16G = 0.732F;
+    private static final float ACCEL_MG_LSB_2G = 0.061f;
+    private static final float ACCEL_MG_LSB_4G = 0.122f;
+    private static final float ACCEL_MG_LSB_8G = 0.244f;
+    private static final float ACCEL_MG_LSB_16G = 0.732f;
     // Magnetic Field Strength: gauss range
-    private static final float MAG_MGAUSS_4GAUSS = 0.14F;
-    private static final float MAG_MGAUSS_8GAUSS = 0.29F;
-    private static final float MAG_MGAUSS_12GAUSS = 0.43F;
-    private static final float MAG_MGAUSS_16GAUSS = 0.58F;
+    private static final float MAG_MGAUSS_4GAUSS = 0.14f;
+    private static final float MAG_MGAUSS_8GAUSS = 0.29f;
+    private static final float MAG_MGAUSS_12GAUSS = 0.43f;
+    private static final float MAG_MGAUSS_16GAUSS = 0.58f;
     // Angular Rate: dps per LSB
-    private static final float GYRO_DPS_DIGIT_245DPS = 0.00875F;
-    private static final float GYRO_DPS_DIGIT_500DPS = 0.01750F;
-    private static final float GYRO_DPS_DIGIT_2000DPS = 0.07000F;
-    private static final int FIFO_MAX_THRESHOLD = 31;
+    private static final float GYRO_DPS_DIGIT_245DPS = 0.00875f;
+    private static final float GYRO_DPS_DIGIT_500DPS = 0.01750f;
+    private static final float GYRO_DPS_DIGIT_2000DPS = 0.07000f;
     private float mAccelMgLsb;
     private float mMagMgaussLsb;
     private float mGyroDpsDigit;
@@ -213,29 +200,16 @@ public class Lsm9ds1 implements Closeable {
     private I2cDevice mMagDevice;
 
     /**
-     * Create a new LSM9DS1 sensor driver connected on the given bus.
+     * Please use the {@link Builder} to create a new LSM9DS1 sensor driver.
      *
-     * @param bus I2C bus the sensor is connected to.
      * @throws IOException
      */
-    public Lsm9ds1(String bus) throws IOException {
-        this(bus, I2C_ADDRESS_ACCEL_GYRO, I2C_ADDRESS_MAG);
-    }
-
-    /**
-     * Create a new LSM9DS1 sensor driver connected on the given bus and address.
-     *
-     * @param bus              I2C bus the sensor is connected to.
-     * @param accelGyroAddress I2C address of the accelerometer/gyroscope sensor.
-     * @param magAddress       I2C address of the magnetometer sensor.
-     * @throws IOException
-     */
-    public Lsm9ds1(String bus, int accelGyroAddress, int magAddress) throws IOException {
+    private Lsm9ds1(Builder builder) throws IOException {
         PeripheralManagerService pioService = new PeripheralManagerService();
-        I2cDevice accelGyroDevice = pioService.openI2cDevice(bus, accelGyroAddress);
-        I2cDevice magDevice = pioService.openI2cDevice(bus, magAddress);
+        I2cDevice accelGyroDevice = pioService.openI2cDevice(builder.mI2cBus, builder.mI2cAddressAccelGyro);
+        I2cDevice magDevice = pioService.openI2cDevice(builder.mI2cBus, builder.mI2cAddressMag);
         try {
-            connect(accelGyroDevice, magDevice);
+            connect(builder, accelGyroDevice, magDevice);
         } catch (IOException | RuntimeException e) {
             try {
                 close();
@@ -245,7 +219,7 @@ public class Lsm9ds1 implements Closeable {
         }
     }
 
-    private void connect(I2cDevice accelGyroDevice, I2cDevice magDevice) throws IOException {
+    private void connect(Builder builder, I2cDevice accelGyroDevice, I2cDevice magDevice) throws IOException {
         mAccelGyroDevice = accelGyroDevice;
         mMagDevice = magDevice;
 
@@ -258,25 +232,27 @@ public class Lsm9ds1 implements Closeable {
             throw new IllegalStateException("Could not find LSM9DS1, check wiring!");
         }
 
-        setFifoMemoryEnabled(false);
+        // FIFO configuration
+        setFifoModeAndTreshold(builder.mFifoMode, builder.mFifoThreshold);
+        setFifoMemoryEnabled(builder.mFifoMemoryEnabled);
 
         // Accelerometer configuration
-        setAccelerometerOdr(ODR_952HZ);
-        setAccelerometerEnabledAxes(CTRL_REG5_XL_ZEN_XL | CTRL_REG5_XL_YEN_XL | CTRL_REG5_XL_XEN_XL);
-        setAccelerometerDecimation(ACCEL_DEC_0_SAMPLES);
-        setAccelerometerHighResolution(true);
-        setAccelerometerRange(ACCEL_RANGE_2G);
+        setAccelerometerOdr(builder.mAccelerometerOdr);
+        setAccelerometerEnabledAxes(builder.mAccelerometerEnabledAxes);
+        setAccelerometerDecimation(builder.mAccelerometerDecimation);
+        setAccelerometerHighResolution(builder.mAccelerometerHighResolution);
+        setAccelerometerRange(builder.mAccelerometerRange);
 
         // Gyroscope configuration
-        setGyroscopeOdr(ODR_952HZ);
-        setGyroscopeScale(GYRO_SCALE_245DPS);
+        setGyroscopeOdr(builder.mGyroscopeOdr);
+        setGyroscopeScale(builder.mGyroscopeScale);
 
         // Magnetometer configuration
-        setMagnetometerTemperatureCompensation(false);
-        setMagnetometerXYOperatingMode(MAG_XY_OM_LOW_POWER);
-        setMagnetometerZOperatingMode(MAG_Z_OM_LOW_POWER);
-        setMagnetometerSystemOperatingMode(MAG_CONTINUOUS_CONVERSION);
-        setMagnetometerGain(MAG_GAIN_4GAUSS);
+        setMagnetometerTemperatureCompensation(builder.mMagnetometerTemperatureCompensation);
+        setMagnetometerXYOperatingMode(builder.mMagnetometerXYOperatingMode);
+        setMagnetometerZOperatingMode(builder.mMagnetometerZOperatingMode);
+        setMagnetometerSystemOperatingMode(builder.mMagnetometerSystemOperatingMode);
+        setMagnetometerGain(builder.mMagnetometerGain);
     }
 
     private void resetAndReboot(@SensorType int type, boolean waitForReboot) throws IOException {
@@ -496,8 +472,8 @@ public class Lsm9ds1 implements Closeable {
     /**
      * Get the accelerometer enabled axes.
      *
-     * @return bit mask made with {@link #CTRL_REG5_XL_YEN_XL},
-     * {@link #CTRL_REG5_XL_YEN_XL} or {@link #CTRL_REG5_XL_ZEN_XL}.
+     * @return bit mask made with {@link #ACCEL_AXIS_Y},
+     * {@link #ACCEL_AXIS_Y} or {@link #ACCEL_AXIS_Z}.
      * @throws IOException
      */
     public int getAccelerometerEnabledAxes() throws IOException {
@@ -508,11 +484,11 @@ public class Lsm9ds1 implements Closeable {
     /**
      * Set the accelerometer enabled axes.
      *
-     * @param axesFlag bit mask made with {@link #CTRL_REG5_XL_YEN_XL},
-     *                 {@link #CTRL_REG5_XL_YEN_XL} or {@link #CTRL_REG5_XL_ZEN_XL}.
+     * @param axesFlag bit mask made with {@link #ACCEL_AXIS_Y},
+     *                 {@link #ACCEL_AXIS_Y} or {@link #ACCEL_AXIS_Z}.
      * @throws IOException
      */
-    private void setAccelerometerEnabledAxes(int axesFlag) throws IOException {
+    public void setAccelerometerEnabledAxes(int axesFlag) throws IOException {
         // We need to preserve the other bytes in CTRL_REG5_XL. So, first read it:
         byte reg = readRegByte(SENSOR_XG, REGISTER_CTRL_REG5_XL);
         // Then mask out the gyro axes bits:
@@ -540,7 +516,7 @@ public class Lsm9ds1 implements Closeable {
      *
      * @throws IOException
      */
-    private void setGyroscopeScale(@GyroscopeScale int scale) throws IOException {
+    public void setGyroscopeScale(@GyroscopeScale int scale) throws IOException {
         // We need to preserve the other bytes in CTRL_REG1_G. So, first read it:
         byte reg = readRegByte(SENSOR_XG, REGISTER_CTRL_REG1_G);
         // Then mask out the gyro scale bits:
@@ -579,7 +555,7 @@ public class Lsm9ds1 implements Closeable {
      *
      * @throws IOException
      */
-    private void setGyroscopeOdr(@AccelGyroOutputDataRate int odr) throws IOException {
+    public void setGyroscopeOdr(@AccelGyroOutputDataRate int odr) throws IOException {
         // We need to preserve the other bytes in CTRL_REG1_G. So, first read it:
         byte reg = readRegByte(SENSOR_XG, REGISTER_CTRL_REG1_G);
         // Then mask out the gyro odr bits:
@@ -593,8 +569,8 @@ public class Lsm9ds1 implements Closeable {
     /**
      * Get the gyroscope angular rate negative sign axes.
      *
-     * @return bit mask made with {@link #ORIENT_CFG_G_SIGN_X_G},
-     * {@link #ORIENT_CFG_G_SIGN_Y_G} or {@link #ORIENT_CFG_G_SIGN_Z_G}.
+     * @return bit mask made with {@link #GYRO_INVERT_AXIS_X},
+     * {@link #GYRO_INVERT_AXIS_Y} or {@link #GYRO_INVERT_AXIS_Z}.
      * @throws IOException
      */
     public int getGyroscopeAxesAngularRateNegativeSign() throws IOException {
@@ -605,11 +581,11 @@ public class Lsm9ds1 implements Closeable {
     /**
      * Set the gyroscope angular rate negative sign axes.
      *
-     * @param axesFlag bit mask made with {@link #ORIENT_CFG_G_SIGN_X_G},
-     *                 {@link #ORIENT_CFG_G_SIGN_Y_G} or {@link #ORIENT_CFG_G_SIGN_Z_G}.
+     * @param axesFlag bit mask made with {@link #GYRO_INVERT_AXIS_X},
+     *                 {@link #GYRO_INVERT_AXIS_Y} or {@link #GYRO_INVERT_AXIS_Z}.
      * @throws IOException
      */
-    private void setGyroscopeAxesAngularRateNegativeSign(int axesFlag) throws IOException {
+    public void setGyroscopeAxesAngularRateNegativeSign(int axesFlag) throws IOException {
         // We need to preserve the other bytes in ORIENT_CFG_G. So, first read it:
         byte reg = readRegByte(SENSOR_XG, REGISTER_ORIENT_CFG_G);
         // Then mask out the gyro axes bits:
@@ -636,7 +612,7 @@ public class Lsm9ds1 implements Closeable {
      *
      * @throws IOException
      */
-    private void setMagnetometerGain(@MagnetometerGain int gain) throws IOException {
+    public void setMagnetometerGain(@MagnetometerGain int gain) throws IOException {
         // We need to preserve the other bytes in CTRL_REG2_M. So, first read it:
         byte reg = readRegByte(SENSOR_MAG, REGISTER_CTRL_REG2_M);
         // Then mask out the mag gain bits:
@@ -678,7 +654,7 @@ public class Lsm9ds1 implements Closeable {
      *
      * @throws IOException
      */
-    private void setMagnetometerSystemOperatingMode(@MagnetometerSystemOperatingMode int mode) throws IOException {
+    public void setMagnetometerSystemOperatingMode(@MagnetometerSystemOperatingMode int mode) throws IOException {
         // We need to preserve the other bytes in CTRL_REG3_M. So, first read it:
         byte reg = readRegByte(SENSOR_MAG, REGISTER_CTRL_REG3_M);
         // Then mask out the mag operatingMode bits:
@@ -705,7 +681,7 @@ public class Lsm9ds1 implements Closeable {
      *
      * @throws IOException
      */
-    private void setMagnetometerXYOperatingMode(@MagnetometerXYOperatingMode int mode) throws IOException {
+    public void setMagnetometerXYOperatingMode(@MagnetometerXYOperatingMode int mode) throws IOException {
         // We need to preserve the other bytes in CTRL_REG1_M. So, first read it:
         byte reg = readRegByte(SENSOR_MAG, REGISTER_CTRL_REG1_M);
         // Then mask out the mag operatingMode bits:
@@ -732,7 +708,7 @@ public class Lsm9ds1 implements Closeable {
      *
      * @throws IOException
      */
-    private void setMagnetometerZOperatingMode(@MagnetometerZOperatingMode int mode) throws IOException {
+    public void setMagnetometerZOperatingMode(@MagnetometerZOperatingMode int mode) throws IOException {
         // We need to preserve the other bytes in CTRL_REG4_M. So, first read it:
         byte reg = readRegByte(SENSOR_MAG, REGISTER_CTRL_REG4_M);
         // Then mask out the mag operatingMode bits:
@@ -758,7 +734,7 @@ public class Lsm9ds1 implements Closeable {
      *
      * @throws IOException
      */
-    private void setMagnetometerTemperatureCompensation(boolean enable) throws IOException {
+    public void setMagnetometerTemperatureCompensation(boolean enable) throws IOException {
         // We need to preserve the other bytes in CTRL_REG1_M. So, first read it:
         byte reg = readRegByte(SENSOR_MAG, REGISTER_CTRL_REG1_M);
         // Then mask out the mag temperature compensation bits:
@@ -802,12 +778,12 @@ public class Lsm9ds1 implements Closeable {
     /**
      * Read the raw accelerometer sensor values.
      * <p>
-     * If you want the acceleration in SI units (m/s^2) use the {@link #getAcceleration()}.
+     * If you want the acceleration in SI units (m/s^2) use the {@link #readAcceleration()}.
      *
      * @return an integer array containing X, Y, Z axis raw values.
      * @throws IOException
      */
-    public int[] getRawAccelerometerData() throws IOException {
+    public int[] readRawAccelerometerData() throws IOException {
         byte[] buffer = new byte[6];
         int[] result = new int[3];
         readRegBuffer(SENSOR_XG, REGISTER_OUT_X_L_XL, buffer, buffer.length);
@@ -823,24 +799,32 @@ public class Lsm9ds1 implements Closeable {
      * @return a float array containing X, Y, Z axis values in SI units (m/s^2).
      * @throws IOException
      */
-    public float[] getAcceleration() throws IOException {
-        int[] rawAccelerometerData = getRawAccelerometerData();
+    public float[] readAcceleration() throws IOException {
+        int[] rawAccelerometerData = readRawAccelerometerData();
         float[] result = new float[3];
         for (int i = 0; i < rawAccelerometerData.length; i++) {
-            result[i] = rawAccelerometerData[i] * mAccelMgLsb / 1000f * mGravity;
+            result[i] = convertRawAccelerationToSi(rawAccelerometerData[i]);
         }
         return result;
+    }
+
+    private float convertRawAccelerationToSi(int rawAccelerometerData) {
+        return rawAccelerometerData * mAccelMgLsb / 1000f * mGravity;
+    }
+
+    public float getAccelerationSensitivity() {
+        return convertRawAccelerationToSi(1);
     }
 
     /**
      * Read the raw magnetometer sensor values.
      * <p>
-     * If you want the magnetic induction in SI units (Gs) use the {@link #getMagneticInduction()}.
+     * If you want the magnetic induction in SI units (Gs) use the {@link #readMagneticInduction()}.
      *
      * @return an integer array containing X, Y, Z axis raw values.
      * @throws IOException
      */
-    public int[] getRawMagnetometerData() throws IOException {
+    public int[] readRawMagnetometerData() throws IOException {
         byte[] buffer = new byte[6];
         int[] result = new int[3];
         readRegBuffer(SENSOR_MAG, REGISTER_OUT_X_L_M, buffer, buffer.length);
@@ -856,19 +840,27 @@ public class Lsm9ds1 implements Closeable {
      * @return a float array containing X, Y, Z axis values in SI units (Gs).
      * @throws IOException
      */
-    public float[] getMagneticInduction() throws IOException {
-        int[] rawMagnetometerData = getRawMagnetometerData();
+    public float[] readMagneticInduction() throws IOException {
+        int[] rawMagnetometerData = readRawMagnetometerData();
         float[] result = new float[3];
         for (int i = 0; i < rawMagnetometerData.length; i++) {
-            result[i] = rawMagnetometerData[i] * mMagMgaussLsb / 1000f;
+            result[i] = convertRawMagneticInductionToSi(rawMagnetometerData[i]);
         }
         return result;
+    }
+
+    private float convertRawMagneticInductionToSi(int rawMagnetometerData) {
+        return rawMagnetometerData * mMagMgaussLsb / 1000f;
+    }
+
+    public float getMagneticInductionSensitivity() {
+        return convertRawMagneticInductionToSi(1);
     }
 
     /**
      * Read the raw gyroscope sensor values.
      * <p>
-     * If you want the angular velocity in SI units (deg/s) use the {@link #getAngularVelocity()}.
+     * If you want the angular velocity in SI units (deg/s) use the {@link #readAngularVelocity()}.
      *
      * @return an integer array containing X, Y, Z axis raw values.
      * @throws IOException
@@ -889,13 +881,21 @@ public class Lsm9ds1 implements Closeable {
      * @return a float array containing X, Y, Z axis values in SI units (deg/s).
      * @throws IOException
      */
-    public float[] getAngularVelocity() throws IOException {
+    public float[] readAngularVelocity() throws IOException {
         int[] rawGyroscopeData = getRawGyroscopeData();
         float[] result = new float[3];
         for (int i = 0; i < rawGyroscopeData.length; i++) {
-            result[i] = rawGyroscopeData[i] * mGyroDpsDigit;
+            result[i] = convertRawAngularVelocityToSi(rawGyroscopeData[i]);
         }
         return result;
+    }
+
+    private float convertRawAngularVelocityToSi(int rawGyroscopeData) {
+        return rawGyroscopeData * mGyroDpsDigit;
+    }
+
+    public float getAngularVelocitySensitivity() {
+        return convertRawAngularVelocityToSi(1);
     }
 
     /**
@@ -906,7 +906,7 @@ public class Lsm9ds1 implements Closeable {
      * @return raw data temperature.
      * @throws IOException
      */
-    public int getRawTemperature() throws IOException {
+    public int readRawTemperature() throws IOException {
         byte[] buffer = new byte[2];
         readRegBuffer(SENSOR_XG, REGISTER_TEMP_OUT_L, buffer, buffer.length);
         return ((int) buffer[1] << 8) | (buffer[0] & 0xFF);
@@ -922,8 +922,12 @@ public class Lsm9ds1 implements Closeable {
      * @return the temperature in degrees Celsius.
      * @throws IOException
      */
-    public float getTemperature() throws IOException {
-        return getRawTemperature() / TEMP_LSB_DEGREE_CELSIUS + TEMP_BIAS;
+    public float readTemperature() throws IOException {
+        return readRawTemperature() / TEMP_LSB_DEGREE_CELSIUS + TEMP_BIAS;
+    }
+
+    public float getTemperatureSensitivity() {
+        return 1 / TEMP_LSB_DEGREE_CELSIUS;
     }
 
     /**
@@ -1285,5 +1289,236 @@ public class Lsm9ds1 implements Closeable {
     @interface SensorType {
         int SENSOR_MAG = 0;
         int SENSOR_XG = 1;
+    }
+
+    public static class Builder {
+        private String mI2cBus;
+        private int mI2cAddressAccelGyro = I2C_ADDRESS_ACCEL_GYRO;
+        private int mI2cAddressMag = I2C_ADDRESS_MAG;
+
+        @FifoMode
+        private int mFifoMode = FifoMode.FIFO_OFF;
+        private int mFifoThreshold = FIFO_MAX_THRESHOLD;
+        private boolean mFifoMemoryEnabled = false;
+
+        // Accelerometer configuration
+        @AccelGyroOutputDataRate
+        private int mAccelerometerOdr = ODR_952HZ;
+        private int mAccelerometerEnabledAxes = ACCEL_AXIS_Z | ACCEL_AXIS_Y | ACCEL_AXIS_X;
+        @AccelerometerDecimation
+        private int mAccelerometerDecimation = ACCEL_DEC_0_SAMPLES;
+        private boolean mAccelerometerHighResolution = true;
+        @AccelerometerRange
+        private int mAccelerometerRange = ACCEL_RANGE_2G;
+
+        // Gyroscope configuration
+        @AccelGyroOutputDataRate
+        private int mGyroscopeOdr = ODR_952HZ;
+        @GyroscopeScale
+        private int mGyroscopeScale = GYRO_SCALE_245DPS;
+
+        // Magnetometer configuration
+        private boolean mMagnetometerTemperatureCompensation = false;
+        @MagnetometerXYOperatingMode
+        private int mMagnetometerXYOperatingMode = MAG_XY_OM_LOW_POWER;
+        @MagnetometerZOperatingMode
+        private int mMagnetometerZOperatingMode = MAG_Z_OM_LOW_POWER;
+        @MagnetometerSystemOperatingMode
+        private int mMagnetometerSystemOperatingMode = MAG_CONTINUOUS_CONVERSION;
+        @MagnetometerGain
+        private int mMagnetometerGain = MAG_GAIN_4GAUSS;
+
+        /**
+         * Creates a builder for a LSM9DS1 sensor that uses the default configuration values.
+         *
+         * @param bus I2C bus the sensor is connected to.
+         */
+        public Builder(String bus) {
+            mI2cBus = bus;
+        }
+
+        /**
+         * Sets the I2c address of the Accelerometer/Gyroscope
+         *
+         * @return this Builder object to allow for chaining of calls to set methods
+         */
+        public Builder setI2cAddressAccelGyro(int i2cAddressAccelGyro) {
+            mI2cAddressAccelGyro = i2cAddressAccelGyro;
+            return this;
+        }
+
+        /**
+         * Sets the I2c address of the Magnetometer
+         *
+         * @return this Builder object to allow for chaining of calls to set methods
+         */
+        public Builder setI2cAddressMag(int i2cAddressMag) {
+            mI2cAddressMag = i2cAddressMag;
+            return this;
+        }
+
+        /**
+         * Configure FIFO mode and Threshold.
+         *
+         * @param mode Set FIFO mode to off, FIFO (stop when full), continuous, bypass. See {@link FifoMode}.
+         * @return this Builder object to allow for chaining of calls to set methods
+         */
+        public Builder setFifoModeAndTreshold(@FifoMode int mode, int threshold) {
+            mFifoMode = mode;
+            mFifoThreshold = threshold;
+            return this;
+        }
+
+        /**
+         * Enable/disable FIFO memory.
+         *
+         * @param enable True to enable FIFO memory; false to disable FIFO memory.
+         * @return this Builder object to allow for chaining of calls to set methods
+         */
+        public Builder setFifoMemoryEnabled(boolean enable) {
+            mFifoMemoryEnabled = enable;
+            return this;
+        }
+
+        /**
+         * Set the accelerometer output data rate.
+         * Must be one of the {@link AccelGyroOutputDataRate} values.
+         *
+         * @return this Builder object to allow for chaining of calls to set methods
+         */
+        public Builder setAccelerometerOdr(@AccelGyroOutputDataRate int accelerometerOdr) {
+            mAccelerometerOdr = accelerometerOdr;
+            return this;
+        }
+
+        /**
+         * Set the accelerometer enabled axes.
+         *
+         * @param axesFlag bit mask made with {@link #ACCEL_AXIS_Y},
+         *                 {@link #ACCEL_AXIS_Y} or {@link #ACCEL_AXIS_Z}.
+         * @return this Builder object to allow for chaining of calls to set methods
+         */
+        public Builder setAccelerometerEnabledAxes(int axesFlag) {
+            mAccelerometerEnabledAxes = axesFlag;
+            return this;
+        }
+
+        /**
+         * Set the accelerometer decimation data on OUT REG and FIFO.
+         * Must be one of the {@link AccelerometerDecimation} values.
+         *
+         * @return this Builder object to allow for chaining of calls to set methods
+         */
+        public Builder setAccelerometerDecimation(@AccelerometerDecimation int accelerometerDecimation) {
+            mAccelerometerDecimation = accelerometerDecimation;
+            return this;
+        }
+
+        /**
+         * Set the accelerometer highResolution.
+         *
+         * @return this Builder object to allow for chaining of calls to set methods
+         */
+        public Builder setAccelerometerHighResolution(boolean accelerometerHighResolution) {
+            mAccelerometerHighResolution = accelerometerHighResolution;
+            return this;
+        }
+
+        /**
+         * Set the accelerometer range.
+         * Must be one of the {@link AccelerometerRange} values.
+         *
+         * @return this Builder object to allow for chaining of calls to set methods
+         */
+        public Builder setAccelerometerRange(@AccelerometerRange int accelerometerRange) {
+            mAccelerometerRange = accelerometerRange;
+            return this;
+        }
+
+        /**
+         * Set the gyroscope output data rate.
+         * Must be one of the {@link AccelGyroOutputDataRate} values.
+         *
+         * @return this Builder object to allow for chaining of calls to set methods
+         */
+        public Builder setGyroscopeOdr(@AccelGyroOutputDataRate int gyroscopeOdr) {
+            mGyroscopeOdr = gyroscopeOdr;
+            return this;
+        }
+
+        /**
+         * Set the gyroscope scale.
+         * Must be one of the {@link GyroscopeScale} values.
+         *
+         * @return this Builder object to allow for chaining of calls to set methods
+         */
+        public Builder setGyroscopeScale(@GyroscopeScale int gyroscopeScale) {
+            mGyroscopeScale = gyroscopeScale;
+            return this;
+        }
+
+        /**
+         * Set the magnetometer temperatureCompensation.
+         *
+         * @return this Builder object to allow for chaining of calls to set methods
+         */
+        public Builder setMagnetometerTemperatureCompensation(boolean magnetometerTemperatureCompensation) {
+            mMagnetometerTemperatureCompensation = magnetometerTemperatureCompensation;
+            return this;
+        }
+
+        /**
+         * Set the magnetometer operating mode.
+         * Must be one of the {@link MagnetometerXYOperatingMode} values.
+         *
+         * @return this Builder object to allow for chaining of calls to set methods
+         */
+        public Builder setMagnetometerXYOperatingMode(@MagnetometerXYOperatingMode int magnetometerXYOperatingMode) {
+            mMagnetometerXYOperatingMode = magnetometerXYOperatingMode;
+            return this;
+        }
+
+        /**
+         * Set the magnetometer operating mode.
+         * Must be one of the {@link MagnetometerZOperatingMode} values.
+         *
+         * @return this Builder object to allow for chaining of calls to set methods
+         */
+        public Builder setMagnetometerZOperatingMode(@MagnetometerZOperatingMode int magnetometerZOperatingMode) {
+            mMagnetometerZOperatingMode = magnetometerZOperatingMode;
+            return this;
+        }
+
+        /**
+         * Set the magnetometer operating mode.
+         * Must be one of the {@link MagnetometerSystemOperatingMode} values.
+         *
+         * @return this Builder object to allow for chaining of calls to set methods
+         */
+        public Builder setMagnetometerSystemOperatingMode(@MagnetometerSystemOperatingMode int magnetometerSystemOperatingMode) {
+            mMagnetometerSystemOperatingMode = magnetometerSystemOperatingMode;
+            return this;
+        }
+
+        /**
+         * Set the magnetometer gain.
+         * Must be one of the {@link MagnetometerGain} values.
+         *
+         * @return this Builder object to allow for chaining of calls to set methods
+         */
+        public Builder setMagnetometerGain(@MagnetometerGain int magnetometerGain) {
+            mMagnetometerGain = magnetometerGain;
+            return this;
+        }
+
+        /**
+         * Create a new LSM9DS1 sensor driver.
+         *
+         * @return a new LSM9DS1 instance.
+         * @throws IOException
+         */
+        public Lsm9ds1 build() throws IOException {
+            return new Lsm9ds1(this);
+        }
     }
 }
