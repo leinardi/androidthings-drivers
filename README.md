@@ -35,9 +35,9 @@ dependencies {
 <!-- DRIVER_LIST_START -->
 Driver | Type | Usage (add to your gradle dependencies) | Note
 :---:|:---:| --- | ---
+[driver-lsm9ds1](driver-lsm9ds1) | 3D accelerometer, 3D gyroscope, 3D magnetometer and temperature sensor | `implementation 'com.leinardi.androidthings:driver-lsm9ds1:0.1'` | [![Bintray](https://img.shields.io/bintray/v/leinardi/androidthings/driver-lsm9ds1.svg)](https://bintray.com/leinardi/androidthings/driver-lsm9ds1) [changelog](driver-lsm9ds1/CHANGELOG.md) [sample](sample-lsm9ds1)
 [driver-pcf8574-hd44780](driver-pcf8574-hd44780) | alphanumeric dot matrix LCD | `implementation 'com.leinardi.androidthings:driver-pcf8574-hd44780:0.1'` | [![Bintray](https://img.shields.io/bintray/v/leinardi/androidthings/driver-pcf8574-hd44780.svg)](https://bintray.com/leinardi/androidthings/driver-pcf8574-hd44780) [changelog](driver-pcf8574-hd44780/CHANGELOG.md) [sample](sample-pcf8574-hd44780)
 [driver-sh1106](driver-sh1106) | OLED display | `implementation 'com.leinardi.androidthings:driver-sh1106:0.1'` | [![Bintray](https://img.shields.io/bintray/v/leinardi/androidthings/driver-sh1106.svg)](https://bintray.com/leinardi/androidthings/driver-sh1106) [changelog](driver-sh1106/CHANGELOG.md) [sample](sample-sh1106)
-[driver-lsm9ds1](driver-lsm9ds1) | 3D accelerometer, 3D gyroscope, 3D magnetometer and temperature sensor | `implementation 'com.leinardi.androidthings:driver-lsm9ds1:0.1'` | [![Bintray](https://img.shields.io/bintray/v/leinardi/androidthings/driver-lsm9ds1.svg)](https://bintray.com/leinardi/androidthings/driver-lsm9ds1) [changelog](driver-lsm9ds1/CHANGELOG.md) [sample](sample-lsm9ds1)
 <!-- DRIVER_LIST_END -->
 
 ## License
