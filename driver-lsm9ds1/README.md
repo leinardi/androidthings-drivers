@@ -42,7 +42,7 @@ try {
         .setI2cAddressAccelGyro(Lsm9ds1.I2C_ADDRESS_ACCEL_GYRO)
         .setI2cAddressMag(Lsm9ds1.I2C_ADDRESS_MAG)
         .setAccelerometerDecimation(Lsm9ds1.AccelerometerDecimation.ACCEL_DEC_0_SAMPLES)
-        .setAccelerometerEnabledAxes(Lsm9ds1.CTRL_REG5_XL_ZEN_XL | Lsm9ds1.CTRL_REG5_XL_YEN_XL | Lsm9ds1.CTRL_REG5_XL_XEN_XL)
+        .setAccelerometerEnabledAxes(Lsm9ds1.ACCEL_AXIS_X | Lsm9ds1.ACCEL_AXIS_Y | Lsm9ds1.ACCEL_AXIS_Z)
         .setAccelerometerHighResolution(true)
         .setAccelerometerOdr(Lsm9ds1.AccelGyroOutputDataRate.ODR_952HZ)
         .setAccelerometerRange(Lsm9ds1.AccelerometerRange.ACCEL_RANGE_2G)
