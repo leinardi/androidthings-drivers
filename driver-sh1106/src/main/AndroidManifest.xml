@@ -14,7 +14,7 @@
   ~ limitations under the License.
   -->
 
-<manifest package="com.leinardi.androidthings.sh1106"
+<manifest package="com.leinardi.android.things.driver.sh1106"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application>

@@ -22,7 +22,7 @@ android {
     buildToolsVersion build_versions.build_tools
 
     defaultConfig {
-        applicationId "com.leinardi.androidthings.sh1106.sample"
+        applicationId "com.leinardi.android.things.sample.sh1106"
         minSdkVersion build_versions.min_sdk
         targetSdkVersion build_versions.target_sdk
         versionCode build_versions.version_code
@@ -49,6 +49,6 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     compileOnly deps.androidthings
     implementation deps.support.annotations
-    implementation 'com.leinardi.androidthings:driver-sh1106:0.1'
+    implementation project(':driver-sh1106')
 
 }

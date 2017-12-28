@@ -1,6 +1,6 @@
 # LSM9DS1 sensor driver for Android Things
 
-[![Maven metadata URI](https://img.shields.io/maven-metadata/v/http/jcenter.bintray.com/com/leinardi/androidthings/driver-lsm9ds1/maven-metadata.xml.svg?style=plastic)](https://jcenter.bintray.com/com/leinardi/androidthings/driver-lsm9ds1/maven-metadata.xml)
+[![Maven metadata URI](https://img.shields.io/maven-metadata/v/http/jcenter.bintray.com/com/leinardi/android/things/driver-lsm9ds1/maven-metadata.xml.svg?style=plastic)](https://jcenter.bintray.com/com/leinardi/android/things/driver-lsm9ds1/maven-metadata.xml)
 [![Build Status](https://img.shields.io/travis/leinardi/androidthings-drivers/master.svg?style=plastic)](https://travis-ci.org/leinardi/androidthings-drivers)
 [![GitHub license](https://img.shields.io/github/license/leinardi/androidthings-drivers.svg?style=plastic)](https://github.com/leinardi/androidthings-drivers/blob/master/LICENSE)
 
@@ -24,14 +24,14 @@ where `<version>` matches the last version of the driver available on [jcenter][
 
 ```
 dependencies {
-    implementation 'com.leinardi.androidthings:driver-lsm9ds1:<version>'
+    implementation 'com.leinardi.android.things:driver-lsm9ds1:<version>'
 }
 ```
 
 ### Sample usage
 
 ```java
-import com.leinardi.androidthings.driver.lsm9ds1.Lsm9ds1;
+import com.leinardi.android.things.driver.lsm9ds1.Lsm9ds1;
 
 // Access the sensor:
 

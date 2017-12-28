@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.leinardi.androidthings.driver.sh1106;
+package com.leinardi.android.things.driver.sh1106;
 
 import android.graphics.Bitmap;
 
@@ -75,7 +75,8 @@ public class Sh1106Test {
 
         for (int invalidValue : invalidValues) {
             mExpectedException.expect(IllegalArgumentException.class);
-            mExpectedException.expectMessage("Invalid contrast " + String.valueOf(invalidValue) + ", level must be between 0 and 255");
+            mExpectedException.expectMessage("Invalid contrast " + String.valueOf(invalidValue) + ", level must be " +
+                    "between 0 and 255");
             sh1106.setContrast(invalidValue);
             Mockito.verify(mI2c, Mockito.never()).writeRegByte(0x00, (byte) 0x81);
             Mockito.verify(mI2c, Mockito.never()).writeRegByte(0x00, (byte) 66);

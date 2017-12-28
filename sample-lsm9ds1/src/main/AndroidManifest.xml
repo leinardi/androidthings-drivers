@@ -15,7 +15,7 @@
   ~ limitations under the License.
   -->
 
-<manifest package="com.leinardi.androidthings.lsm9ds1.sample"
+<manifest package="com.leinardi.android.things.sample.lsm9ds1"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
@@ -30,7 +30,7 @@
 
         <uses-library android:name="com.google.android.things" />
 
-        <activity android:name=".AccelerationActivity">
+        <activity android:name="com.leinardi.android.things.sample.lsm9ds1.AccelerationActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

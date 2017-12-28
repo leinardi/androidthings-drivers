@@ -15,7 +15,7 @@
   ~ limitations under the License.
   -->
 
-<manifest package="com.leinardi.androidthings.sh1106.sample"
+<manifest package="com.leinardi.android.things.sample.sh1106"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
@@ -28,7 +28,7 @@
 
         <uses-library android:name="com.google.android.things" />
 
-        <activity android:name=".OledScreenActivity">
+        <activity android:name="com.leinardi.android.things.sample.sh1106.OledScreenActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
