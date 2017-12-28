@@ -16,8 +16,8 @@
 
 package com.leinardi.android.things.driver.hd44780;
 
-import android.os.SystemClock;
 import android.support.annotation.IntDef;
+import android.util.Log;
 
 import com.google.android.things.pio.I2cDevice;
 import com.google.android.things.pio.PeripheralManagerService;
@@ -31,6 +31,7 @@ import java.lang.annotation.RetentionPolicy;
  */
 public class Hd44780 implements AutoCloseable {
     private static final String TAG = Hd44780.class.getSimpleName();
+    private static final int NANOS_PER_MILLI = 1000000;
     private static final int COL_INDEX = 0;
     private static final int ROW_INDEX = 1;
     private static final int[][] GEOMETRIES = new int[][]{{8, 1}, {16, 2}, {20, 2}, {20, 4}};
@@ -508,15 +509,14 @@ public class Hd44780 implements AutoCloseable {
         mI2cDevice.write(new byte[]{i2cData}, 1);
     }
 
-    private void delayMicroseconds(long us) {
-        if (us % 1000 == 0) {
-            SystemClock.sleep(us / 1000);
-        } else {
-            long start = System.nanoTime();
-            long ns = us * 1000;
-            // SUPPRESS CHECKSTYLE EmptyBlock
-            while (System.nanoTime() - start < ns) {
-            }
+    private void delayMicroseconds(long micros) {
+        long nanos = micros * 1000;
+        long millis = nanos / NANOS_PER_MILLI;
+        nanos %= NANOS_PER_MILLI;
+        try {
+            Thread.sleep(millis, (int) nanos);
+        } catch (InterruptedException e) {
+            Log.e(TAG, "InterruptedException", e);
         }
     }
 
