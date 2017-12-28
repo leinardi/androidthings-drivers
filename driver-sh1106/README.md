@@ -1,6 +1,6 @@
 # SH1106 display driver for Android Things
 
-[![Bintray](https://img.shields.io/bintray/v/leinardi/androidthings/driver-sh1106.svg?style=plastic)](https://bintray.com/leinardi/androidthings/driver-sh1106)
+[![Maven metadata URI](https://img.shields.io/maven-metadata/v/http/jcenter.bintray.com/com/leinardi/androidthings/driver-sh1106/maven-metadata.xml.svg?style=plastic)](https://jcenter.bintray.com/com/leinardi/androidthings/driver-sh1106/maven-metadata.xml)
 [![Build Status](https://img.shields.io/travis/leinardi/androidthings-drivers/master.svg?style=plastic)](https://travis-ci.org/leinardi/androidthings-drivers)
 [![GitHub license](https://img.shields.io/github/license/leinardi/androidthings-drivers.svg?style=plastic)](https://github.com/leinardi/androidthings-drivers/blob/master/LICENSE)
 
