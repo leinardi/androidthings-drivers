@@ -22,7 +22,7 @@ If you prefer to run on the command line, from this repository's root directory,
 
 ```bash
 ./gradlew sample-lsm9ds1:installDebug
-adb shell am start com.leinardi.androidthings.lsm9ds1.sample/.AccelerationActivity
+adb shell am start com.leinardi.android.things.sample.lsm9ds1/.AccelerationActivity
 ```
 
 If you have everything set up correctly, in the logcat will be printed the values

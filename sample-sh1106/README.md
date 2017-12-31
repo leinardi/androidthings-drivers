@@ -20,7 +20,7 @@ If you prefer to run on the command line, from this repository's root directory,
 
 ```bash
 ./gradlew sample-sh1106:installDebug
-adb shell am start com.leinardi.androidthings.sh1106.sample/.OledScreenActivity
+adb shell am start com.leinardi.android.things.sample.sh1106/.OledScreenActivity
 ```
 
 If you have everything set up correctly, you will see a small bitmap slowly

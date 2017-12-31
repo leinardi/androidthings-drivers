@@ -1,6 +1,6 @@
 # SH1106 display driver for Android Things
 
-[![Maven metadata URI](https://img.shields.io/maven-metadata/v/http/jcenter.bintray.com/com/leinardi/androidthings/driver-sh1106/maven-metadata.xml.svg?style=plastic)](https://jcenter.bintray.com/com/leinardi/androidthings/driver-sh1106/maven-metadata.xml)
+[![Maven metadata URI](https://img.shields.io/maven-metadata/v/http/jcenter.bintray.com/com/leinardi/android/things/driver-sh1106/maven-metadata.xml.svg?style=plastic)](https://jcenter.bintray.com/com/leinardi/android/things/driver-sh1106/maven-metadata.xml)
 [![Build Status](https://img.shields.io/travis/leinardi/androidthings-drivers/master.svg?style=plastic)](https://travis-ci.org/leinardi/androidthings-drivers)
 [![GitHub license](https://img.shields.io/github/license/leinardi/androidthings-drivers.svg?style=plastic)](https://github.com/leinardi/androidthings-drivers/blob/master/LICENSE)
 
@@ -22,14 +22,14 @@ where `<version>` matches the last version of the driver available on [jcenter][
 
 ```
 dependencies {
-    implementation 'com.leinardi.androidthings:driver-sh1106:<version>'
+    implementation 'com.leinardi.android.things:driver-sh1106:<version>'
 }
 ```
 
 ### Sample usage
 
 ```java
-import com.leinardi.androidthings.driver.sh1106.Sh1106;
+import com.leinardi.android.things.driver.sh1106.Sh1106;
 
 // Access the display:
 

@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-include ':driver-sh1106', ':sample-sh1106', ':driver-pcf8574-hd44780', ':sample-pcf8574-hd44780', ':driver-lsm9ds1', ':sample-lsm9ds1'
+include ':driver-sh1106', ':sample-sh1106', ':driver-hd44780', ':sample-hd44780', ':driver-lsm9ds1', ':sample-lsm9ds1'
