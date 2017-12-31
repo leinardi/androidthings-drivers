@@ -93,8 +93,9 @@ public class Lsm9ds1 implements Closeable {
     static final float MIN_FREQ_HZ_XG = 14.9f;
     static final float MAX_FREQ_HZ_M = 80f;
     static final float MIN_FREQ_HZ_M = 0.625f;
-    static final float MAX_POWER_CONSUMPTION_XM_UA = 600f;
-    static final float MAX_POWER_CONSUMPTION_G_UA = 4100f;
+    static final float MAX_POWER_CONSUMPTION_X_UA = 550f;  // Mesured on Adafruit LSM9DS1
+    static final float MAX_POWER_CONSUMPTION_M_UA = 350f;  // Mesured on Adafruit LSM9DS1
+    static final float MAX_POWER_CONSUMPTION_G_UA = 4900f; // Mesured on Adafruit LSM9DS1
     static final float MAX_ACCEL_RANGE_G_DEFAULT = 2f;
     static final float MAX_GYRO_RATE_DPS_DEFAULT = 245f;
     static final float MAX_MAG_GAIN_GS_DEFAULT = 4f;

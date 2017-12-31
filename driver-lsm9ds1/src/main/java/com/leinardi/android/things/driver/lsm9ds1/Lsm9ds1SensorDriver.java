@@ -85,9 +85,9 @@ public class Lsm9ds1SensorDriver implements AutoCloseable {
      */
     @Override
     public void close() throws IOException {
-        unregisterAccelerationSensor();
-        unregisterAngularVelocitySensor();
-        unregisterMagneticInductionSensor();
+        unregisterAccelerometerSensor();
+        unregisterGyroscopeSensor();
+        unregisterMagneticFieldSensor();
         unregisterTemperatureSensor();
         if (mDevice != null) {
             try {
@@ -101,9 +101,9 @@ public class Lsm9ds1SensorDriver implements AutoCloseable {
     /**
      * Register a {@link UserSensor} that pipes acceleration readings into the Android SensorManager.
      *
-     * @see #unregisterAccelerationSensor()
+     * @see #unregisterAccelerometerSensor()
      */
-    public void registerAccelerationSensor() {
+    public void registerAccelerometerSensor() {
         if (mDevice == null) {
             throw new IllegalStateException("cannot register closed driver");
         }
@@ -117,7 +117,7 @@ public class Lsm9ds1SensorDriver implements AutoCloseable {
     /**
      * Unregister the acceleration {@link UserSensor}.
      */
-    public void unregisterAccelerationSensor() {
+    public void unregisterAccelerometerSensor() {
         if (mAccelerationUserDriver != null) {
             UserDriverManager.getManager().unregisterSensor(mAccelerationUserDriver.getUserSensor());
             mAccelerationUserDriver = null;
@@ -127,9 +127,9 @@ public class Lsm9ds1SensorDriver implements AutoCloseable {
     /**
      * Register a {@link UserSensor} that pipes angular velocity readings into the Android SensorManager.
      *
-     * @see #unregisterAngularVelocitySensor()
+     * @see #unregisterGyroscopeSensor()
      */
-    public void registerAngularVelocitySensor() {
+    public void registerGyroscopeSensor() {
         if (mDevice == null) {
             throw new IllegalStateException("cannot register closed driver");
         }
@@ -143,7 +143,7 @@ public class Lsm9ds1SensorDriver implements AutoCloseable {
     /**
      * Unregister the angular velocity {@link UserSensor}.
      */
-    public void unregisterAngularVelocitySensor() {
+    public void unregisterGyroscopeSensor() {
         if (mAngularVelocityUserDriver != null) {
             UserDriverManager.getManager().unregisterSensor(mAngularVelocityUserDriver.getUserSensor());
             mAngularVelocityUserDriver = null;
@@ -153,9 +153,9 @@ public class Lsm9ds1SensorDriver implements AutoCloseable {
     /**
      * Register a {@link UserSensor} that pipes magnetic induction readings into the Android SensorManager.
      *
-     * @see #unregisterMagneticInductionSensor()
+     * @see #unregisterMagneticFieldSensor()
      */
-    public void registerMagneticInductionSensor() {
+    public void registerMagneticFieldSensor() {
         if (mDevice == null) {
             throw new IllegalStateException("cannot register closed driver");
         }
@@ -169,7 +169,7 @@ public class Lsm9ds1SensorDriver implements AutoCloseable {
     /**
      * Unregister the magnetic induction {@link UserSensor}.
      */
-    public void unregisterMagneticInductionSensor() {
+    public void unregisterMagneticFieldSensor() {
         if (mMagneticInductionUserDriver != null) {
             UserDriverManager.getManager().unregisterSensor(mMagneticInductionUserDriver.getUserSensor());
             mMagneticInductionUserDriver = null;
@@ -253,7 +253,7 @@ public class Lsm9ds1SensorDriver implements AutoCloseable {
         // DRIVER parameters
         // documented at https://source.android.com/devices/sensors/hal-interface.html#sensor_t
         private static final float DRIVER_MAX_RANGE = Lsm9ds1.MAX_ACCEL_RANGE_G_DEFAULT;
-        private static final float DRIVER_POWER = Lsm9ds1.MAX_POWER_CONSUMPTION_XM_UA / 1000.f;
+        private static final float DRIVER_POWER = Lsm9ds1.MAX_POWER_CONSUMPTION_X_UA / 1000.f;
         private static final int DRIVER_VERSION = 1;
         private static final String DRIVER_REQUIRED_PERMISSION = "";
 
@@ -347,7 +347,7 @@ public class Lsm9ds1SensorDriver implements AutoCloseable {
         // DRIVER parameters
         // documented at https://source.android.com/devices/sensors/hal-interface.html#sensor_t
         private static final float DRIVER_MAX_RANGE = Lsm9ds1.MAX_MAG_GAIN_GS_DEFAULT;
-        private static final float DRIVER_POWER = Lsm9ds1.MAX_POWER_CONSUMPTION_XM_UA / 1000.f;
+        private static final float DRIVER_POWER = Lsm9ds1.MAX_POWER_CONSUMPTION_M_UA / 1000.f;
         private static final int DRIVER_VERSION = 1;
         private static final String DRIVER_REQUIRED_PERMISSION = "";
 
@@ -395,7 +395,7 @@ public class Lsm9ds1SensorDriver implements AutoCloseable {
         // documented at https://source.android.com/devices/sensors/hal-interface.html#sensor_t
         private static final float DRIVER_MAX_RANGE = Lsm9ds1.MAX_TEMP_C;
         // The temperature is provided by the Accel
-        private static final float DRIVER_POWER = Lsm9ds1.MAX_POWER_CONSUMPTION_XM_UA / 1000.f;
+        private static final float DRIVER_POWER = Lsm9ds1.MAX_POWER_CONSUMPTION_X_UA / 1000.f;
         private static final int DRIVER_VERSION = 1;
         private static final String DRIVER_REQUIRED_PERMISSION = "";
 
