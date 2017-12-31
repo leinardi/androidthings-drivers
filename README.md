@@ -40,6 +40,12 @@ Driver | Type | Usage (add to your gradle dependencies) | Note
 [driver-sh1106](driver-sh1106) | OLED display | `implementation 'com.leinardi.android.things:driver-sh1106:0.2'` | [![Maven metadata URI](https://img.shields.io/maven-metadata/v/http/jcenter.bintray.com/com/leinardi/android/things/driver-sh1106/maven-metadata.xml.svg)](https://jcenter.bintray.com/com/leinardi/android/things/driver-sh1106/maven-metadata.xml) [changelog](driver-sh1106/CHANGELOG.md) [sample](sample-sh1106)
 <!-- DRIVER_LIST_END -->
 
+## Change of group id and package name
+If you are using the version `0.1` of `driver-lsm9ds1`, `driver-pcf8574-hd44780` or `driver-sh1106` please be aware that
+the group ID and package name of these drives have been changed from `com.leinardi.androidthings` to `com.leinardi.android.things`.
+If you want to use a version newer version than `0.1` you need to update your `build.gradle` to use the new group id and the imports in your Java/Kotlin files to use the new package name.
+In addition to this, also the artifact ID of `driver-pcf8574-hd44780` has been changed to `driver-hd44780`.
+
 ## License
 
 Copyright 2017 Roberto Leinardi.
