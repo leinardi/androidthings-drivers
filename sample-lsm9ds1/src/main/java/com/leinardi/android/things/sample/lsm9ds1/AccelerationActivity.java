@@ -60,7 +60,7 @@ public class AccelerationActivity extends Activity implements SensorEventListene
 
         try {
             mAccelerationSensorDriver = new Lsm9ds1SensorDriver(BoardDefaults.getI2CPort());
-            mAccelerationSensorDriver.registerAccelerationSensor();
+            mAccelerationSensorDriver.registerAccelerometerSensor();
         } catch (IOException e) {
             Log.e(TAG, "Error configuring sensor", e);
         }
@@ -73,7 +73,7 @@ public class AccelerationActivity extends Activity implements SensorEventListene
         if (mAccelerationSensorDriver != null) {
             mSensorManager.unregisterDynamicSensorCallback(mDynamicSensorCallback);
             mSensorManager.unregisterListener(this);
-            mAccelerationSensorDriver.unregisterAccelerationSensor();
+            mAccelerationSensorDriver.unregisterAccelerometerSensor();
             try {
                 mAccelerationSensorDriver.close();
             } catch (IOException e) {
