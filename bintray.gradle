@@ -31,6 +31,7 @@ bintray {
     pkg {
         repo = mvn_config.repository
         name = mvn_config.artifact_id
+        desc = mvn_config.description
         userOrg = user
         licenses = mvn_config.licenses.split(',')
         websiteUrl = mvn_config.website
@@ -39,7 +40,6 @@ bintray {
         labels = mvn_config.tags.split(',')
         version {
             name = mvn_config.version
-            desc = mvn_config.description
         }
     }
 }
