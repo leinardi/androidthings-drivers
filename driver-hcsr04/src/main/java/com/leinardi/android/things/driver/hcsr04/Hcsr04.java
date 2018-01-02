@@ -29,13 +29,14 @@ import java.util.concurrent.TimeUnit;
  * Driver for the HC-SR04 ultrasonic ranging module.
  */
 public class Hcsr04 implements Closeable {
-    static final float MAX_POWER_CONSUMPTION_UA = 3240f;
     public static final int MIN_RANGE = 2;
     public static final int MAX_RANGE = 400;
     public static final float ACCURACY = 0.3f; // 3 mm
+    public static final int MEASUREMENT_INTERVAL_MS = 500;
+    public static final int NO_DATA = -1;
+    static final float MAX_POWER_CONSUMPTION_UA = 3240f;
     private static final String TAG = Hcsr04.class.getSimpleName();
     private static final int TRIG_PULSE_DURATION_IN_US = 10;
-    public static final int MEASUREMENT_INTERVAL_MS = 500;
     private Gpio mTrigGpio;
     private Gpio mEchoGpio;
     private boolean mEnabled;
@@ -43,8 +44,10 @@ public class Hcsr04 implements Closeable {
     private float mDistance;
 
     /**
-     * @param trigPin
-     * @param echoPin
+     * Create a new HC-SR04 ultrasonic ranging module driver.
+     *
+     * @param trigPin The Gpio name for the trigger pin
+     * @param echoPin The Gpio name for the echo pin
      * @throws IOException
      */
     public Hcsr04(String trigPin, String echoPin) throws IOException {
@@ -72,7 +75,9 @@ public class Hcsr04 implements Closeable {
     }
 
     /**
-     * @param enabled
+     * Enable or disable the distance measurement.
+     *
+     * @param enabled True to enable the distance measurement, false to disable.
      * @throws IOException
      */
     public void setEnabled(boolean enabled) throws IOException {
@@ -96,7 +101,7 @@ public class Hcsr04 implements Closeable {
             public void run() {
                 long startTime, endTime;
                 while (!Thread.currentThread().isInterrupted()) {
-                    mDistance = -1;
+                    mDistance = NO_DATA;
                     try {
                         // Just to be sure, set the trigger first to false
                         mTrigGpio.setValue(false);
@@ -161,7 +166,9 @@ public class Hcsr04 implements Closeable {
     }
 
     /**
-     * @return
+     * Get the distance in centimeters.
+     *
+     * @return a float containing the distance in cm.
      */
     public float readDistance() {
         return mDistance;
@@ -191,7 +198,7 @@ public class Hcsr04 implements Closeable {
         }
     }
 
-    private static void busyWaitMicros(long micros) {
+    private void busyWaitMicros(long micros) {
         long waitUntil = System.nanoTime() + (micros * 1000);
         while (waitUntil > System.nanoTime()) {
             System.nanoTime();
