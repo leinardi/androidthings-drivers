@@ -49,7 +49,7 @@ In addition to this, also the artifact ID of `driver-pcf8574-hd44780` has been c
 
 ## License
 
-Copyright 2017 Roberto Leinardi.
+Copyright 2018 Roberto Leinardi.
 
 Licensed to the Apache Software Foundation (ASF) under one or more contributor
 license agreements.  See the NOTICE file distributed with this work for
