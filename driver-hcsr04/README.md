@@ -29,42 +29,66 @@ dependencies {
 ### Sample usage
 
 ```java
-public class DistanceActivity extends Activity {
+public class DistanceActivity extends Activity implements SensorEventListener {
+    private static final String TAG = DistanceActivity.class.getSimpleName();
+
+    private Hcsr04SensorDriver mProximitySensorDriver;
+    private SensorManager mSensorManager;
+
+    private SensorManager.DynamicSensorCallback mDynamicSensorCallback = new SensorManager
+            .DynamicSensorCallback() {
+        @Override
+        public void onDynamicSensorConnected(Sensor sensor) {
+            if (sensor.getType() == Sensor.TYPE_PROXIMITY) {
+                mSensorManager.registerListener(DistanceActivity.this,
+                        sensor, SensorManager.SENSOR_DELAY_NORMAL);
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        mSensorManager.registerDynamicSensorCallback(mDynamicSensorCallback);
+
         try {
-            mDevice = new Hcsr04("BCM17", "BCM4");
-            mDevice.setEnabled(enabled);
+            mProximitySensorDriver = new Hcsr04SensorDriver(trigPin, echoPin);
+            mProximitySensorDriver.registerProximitySensor();
         } catch (IOException e) {
             // couldn't configure the device...
         }
 
     }
-    
-    private void readDistance(){
-        float distance = mDevice.readDistance();
-    }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        try {
-            mDevice.close();
-        } catch (IOException e) {
-            // error closing sensor
-        } finally {
-            mDevice = null;
+        if (mProximitySensorDriver != null) {
+            mSensorManager.unregisterDynamicSensorCallback(mDynamicSensorCallback);
+            mSensorManager.unregisterListener(this);
+            mProximitySensorDriver.unregisterProximitySensor();
+            try {
+                mProximitySensorDriver.close();
+            } catch (IOException e) {
+                // error closing sensor
+            } finally {
+                mProximitySensorDriver = null;
+            }
         }
     }
 
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        Log.i(TAG, String.format(Locale.getDefault(), "sensor changed: [%f]", event.values[0]));
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    }
 }
-
 ```
-
-To use it with the `SensorManager` check the [sample project](https://github.com/leinardi/androidthings-drivers/tree/hcsr04/sample-hcsr04).
 
 ## License
 
