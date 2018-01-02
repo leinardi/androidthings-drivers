@@ -25,13 +25,14 @@ import com.google.android.things.pio.PeripheralManagerService;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Driver for controlling the hd44780 LCD via the PCF8574's I2C.
  */
 public class Hd44780 implements AutoCloseable {
     private static final String TAG = Hd44780.class.getSimpleName();
-    private static final int NANOS_PER_MILLI = 1000000;
+    private static final int NANOS_PER_MILLI = (int) TimeUnit.MILLISECONDS.toNanos(1);
     private static final int COL_INDEX = 0;
     private static final int ROW_INDEX = 1;
     private static final int[][] GEOMETRIES = new int[][]{{8, 1}, {16, 2}, {20, 2}, {20, 4}};
