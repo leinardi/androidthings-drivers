@@ -41,11 +41,11 @@ public class Hcsr04SensorDriver implements AutoCloseable {
 
     private Hcsr04 mDevice;
 
-    private AccelerationUserDriver mDistanceUserDriver;
+    private DistanceUserDriver mDistanceUserDriver;
 
     /**
      * Create a new framework sensor driver connected on the given bus and address.
-     * The driver emits {@link android.hardware.Sensor} with acceleration, angular velocity,
+     * The driver emits {@link android.hardware.Sensor} with proximity, angular velocity,
      * magnetic induction and temperature data when registered.
      *
      * @throws IOException
@@ -72,7 +72,7 @@ public class Hcsr04SensorDriver implements AutoCloseable {
     }
 
     /**
-     * Register a {@link UserSensor} that pipes acceleration readings into the Android SensorManager.
+     * Register a {@link UserSensor} that pipes proximity readings into the Android SensorManager.
      *
      * @see #unregisterProximitySensor()
      */
@@ -82,13 +82,13 @@ public class Hcsr04SensorDriver implements AutoCloseable {
         }
 
         if (mDistanceUserDriver == null) {
-            mDistanceUserDriver = new AccelerationUserDriver();
+            mDistanceUserDriver = new DistanceUserDriver();
             UserDriverManager.getManager().registerSensor(mDistanceUserDriver.getUserSensor());
         }
     }
 
     /**
-     * Unregister the acceleration {@link UserSensor}.
+     * Unregister the proximity {@link UserSensor}.
      */
     public void unregisterProximitySensor() {
         if (mDistanceUserDriver != null) {
@@ -97,7 +97,7 @@ public class Hcsr04SensorDriver implements AutoCloseable {
         }
     }
 
-    private class AccelerationUserDriver extends UserSensorDriver {
+    private class DistanceUserDriver extends UserSensorDriver {
         private UserSensor mUserSensor;
 
         private UserSensor getUserSensor() {
