@@ -180,10 +180,17 @@ public class Hcsr04 implements Closeable {
      * @throws IOException
      */
     @Override
-    public void close() throws IOException {
+    public void close() {
+        try {
+            stopThread();
+        } catch (IOException e) {
+            Log.w(TAG, "An error occurred while stopping the thread", e);
+        }
         if (mEchoGpio != null) {
             try {
                 mEchoGpio.close();
+            } catch (IOException e) {
+                Log.w(TAG, "Unable to close GPIO device", e);
             } finally {
                 mEchoGpio = null;
             }
@@ -192,6 +199,8 @@ public class Hcsr04 implements Closeable {
         if (mTrigGpio != null) {
             try {
                 mTrigGpio.close();
+            } catch (IOException e) {
+                Log.w(TAG, "Unable to close GPIO device", e);
             } finally {
                 mTrigGpio = null;
             }
