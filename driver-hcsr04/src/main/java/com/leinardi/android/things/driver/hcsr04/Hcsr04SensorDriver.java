@@ -125,9 +125,5 @@ public class Hcsr04SensorDriver implements AutoCloseable {
             return new UserSensorReading(new float[]{mDevice.readDistance()});
         }
 
-        @Override
-        public void setEnabled(boolean enabled) throws IOException {
-            mDevice.setEnabled(enabled);
-        }
     }
 }

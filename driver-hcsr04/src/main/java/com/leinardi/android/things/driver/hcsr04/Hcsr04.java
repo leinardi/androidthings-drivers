@@ -16,6 +16,8 @@
 
 package com.leinardi.android.things.driver.hcsr04;
 
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.util.Log;
 
 import com.google.android.things.pio.Gpio;
@@ -36,11 +38,13 @@ public class Hcsr04 implements Closeable {
     public static final int NO_DATA = -1;
     static final float MAX_POWER_CONSUMPTION_UA = 3240f;
     private static final String TAG = Hcsr04.class.getSimpleName();
+    private static final float MAGIC_NUMBER_FROM_DATASHEET = 58.23f;
+    private static final int MAX_ECHO_WAIT_NS =
+            (int) (MAX_RANGE * TimeUnit.MICROSECONDS.toNanos(1) * MAGIC_NUMBER_FROM_DATASHEET);
     private static final int TRIG_PULSE_DURATION_IN_US = 10;
     private Gpio mTrigGpio;
     private Gpio mEchoGpio;
-    private boolean mEnabled;
-    private Thread mThread;
+    private final Hcsr04HandlerThread mHandlerThread;
     private float mDistance;
 
     /**
@@ -60,6 +64,7 @@ public class Hcsr04 implements Closeable {
             close();
             throw e;
         }
+        mHandlerThread = new Hcsr04HandlerThread();
     }
 
     private void connect(Gpio trigGpio, Gpio echoGpio) throws IOException {
@@ -74,103 +79,66 @@ public class Hcsr04 implements Closeable {
 
     }
 
-    /**
-     * Enable or disable the distance measurement.
-     *
-     * @param enabled True to enable the distance measurement, false to disable.
-     * @throws IOException
-     */
-    public void setEnabled(boolean enabled) throws IOException {
-        if (mEchoGpio == null || mTrigGpio == null) {
-            throw new IllegalStateException("GPIO Device not open");
-        }
-        if (mEnabled != enabled) {
-            mEnabled = enabled;
-            if (enabled) {
-                startNewThread();
-            } else {
-                stopThread();
+    private void measureDistance() {
+        long startTime, endTime;
+        mDistance = NO_DATA;
+        try {
+            // Just to be sure, set the trigger first to false
+            mTrigGpio.setValue(false);
+            Thread.sleep(1);
+
+            // Hold the trigger pin HIGH for at least 10 us
+            mTrigGpio.setValue(true);
+            // Thread.sleep() takes minimum ~100.000 ns to be executed on RPi3, even if you set only 10 ns
+            busyWaitMicros(TRIG_PULSE_DURATION_IN_US);
+
+            // Reset the trigger pin
+            mTrigGpio.setValue(false);
+
+            // Wait for pulse on echo pin
+            startTime = System.nanoTime();
+            // SUPPRESS CHECKSTYLE EmptyBlock
+            do {
+            } while (!mEchoGpio.getValue() && (System.nanoTime() - startTime < 1_000_000));
+
+            startTime = System.nanoTime();
+            // Wait for the end of the pulse on the ECHO pin
+            // SUPPRESS CHECKSTYLE EmptyBlock
+            do {
+            } while (mEchoGpio.getValue() && (System.nanoTime() - startTime < MAX_ECHO_WAIT_NS));
+            endTime = System.nanoTime();
+
+            // Measure how long the echo pin was held high (pulse width)
+            long echoDuration = endTime - startTime;
+
+            // Calculate distance in centimeters. The constants
+            // are coming from the datasheet, and calculated from the assumed speed
+            // of sound in air at sea level (~340 m/s).
+            float distance = TimeUnit.NANOSECONDS.toMicros(echoDuration) / MAGIC_NUMBER_FROM_DATASHEET; //cm
+
+            if (distance > MIN_RANGE && distance < MAX_RANGE) {
+                mDistance = distance;
             }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            Log.d(TAG, "Hcsr04 thread interrupted");
+            return;
+        } catch (IOException e) {
+            Log.e(TAG, "GPIO error", e);
         }
-    }
-
-    private void startNewThread() throws IOException {
-        stopThread();
-        mThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                long startTime, endTime;
-                while (!Thread.currentThread().isInterrupted()) {
-                    mDistance = NO_DATA;
-                    try {
-                        // Just to be sure, set the trigger first to false
-                        mTrigGpio.setValue(false);
-                        Thread.sleep(1);
-
-                        // Hold the trigger pin HIGH for at least 10 us
-                        mTrigGpio.setValue(true);
-                        // Thread.sleep() takes minimum ~100.000 ns to be executed on RPi3, even if you set only 10 ns
-                        busyWaitMicros(TRIG_PULSE_DURATION_IN_US);
-
-                        // Reset the trigger pin
-                        mTrigGpio.setValue(false);
-
-                        // Wait for pulse on echo pin
-                        startTime = System.nanoTime();
-                        do {
-                            Thread.sleep(0, 10_000); // ~120.000 ns on RPi3
-                        } while (!mEchoGpio.getValue() && (System.nanoTime() - startTime < 1_000_000));
-
-                        startTime = System.nanoTime();
-                        // Wait for the end of the pulse on the ECHO pin
-                        do {
-                            Thread.sleep(0, 10_000); // ~120.000 ns on RPi3
-                        } while (mEchoGpio.getValue());
-                        endTime = System.nanoTime();
-
-                        // Measure how long the echo pin was held high (pulse width)
-                        long echoDuration = endTime - startTime;
-
-                        // Calculate distance in centimeters. The constants
-                        // are coming from the datasheet, and calculated from the assumed speed
-                        // of sound in air at sea level (~340 m/s).
-                        float distance = TimeUnit.NANOSECONDS.toMicros(echoDuration) / 58.23f; //cm
-
-                        if (distance > MIN_RANGE && distance < MAX_RANGE) {
-                            mDistance = distance;
-                        }
-                        Thread.sleep(MEASUREMENT_INTERVAL_MS);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                        Log.d(TAG, "Hcsr04 thread interrupted");
-                        return;
-                    } catch (IOException e) {
-                        Log.e(TAG, "GPIO error", e);
-                        try {
-                            stopThread();
-                        } catch (IOException ignored) {
-                        }
-                    }
-                }
-            }
-        });
-        mThread.setPriority(Thread.NORM_PRIORITY + 1);
-        mThread.start();
-    }
-
-    private void stopThread() throws IOException {
-        if (mThread != null && mThread.isAlive()) {
-            mThread.interrupt();
-        }
-        mTrigGpio.setValue(false);
     }
 
     /**
      * Get the distance in centimeters.
+     * <p>
+     * NOTE: The measurement of the distance can take up to 25 ms.
      *
      * @return a float containing the distance in cm.
      */
     public float readDistance() {
+        synchronized (mHandlerThread) {
+            mHandlerThread.measure();
+        }
         return mDistance;
     }
 
@@ -181,11 +149,7 @@ public class Hcsr04 implements Closeable {
      */
     @Override
     public void close() {
-        try {
-            stopThread();
-        } catch (IOException e) {
-            Log.w(TAG, "An error occurred while stopping the thread", e);
-        }
+        mHandlerThread.quit();
         if (mEchoGpio != null) {
             try {
                 mEchoGpio.close();
@@ -211,6 +175,35 @@ public class Hcsr04 implements Closeable {
         long waitUntil = System.nanoTime() + (micros * 1000);
         while (waitUntil > System.nanoTime()) {
             System.nanoTime();
+        }
+    }
+
+    private class Hcsr04HandlerThread extends HandlerThread {
+        private final Handler mHandler;
+
+        Hcsr04HandlerThread() {
+            super("hcsr04-handler-thread", Thread.NORM_PRIORITY + 1);
+            start();
+            mHandler = new Handler(getLooper());
+        }
+
+        private synchronized void notifyMeasurementDone() {
+            notify();
+        }
+
+        void measure() {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    measureDistance();
+                    notifyMeasurementDone();
+                }
+            });
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                Log.w(TAG, "wait was interrupted");
+            }
         }
     }
 }

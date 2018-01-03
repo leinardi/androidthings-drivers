@@ -65,7 +65,6 @@ public class DistanceActivity extends Activity implements SensorEventListener {
         } catch (IOException e) {
             Log.e(TAG, "Error configuring sensor", e);
         }
-
     }
 
     @Override
