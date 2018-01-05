@@ -1,4 +1,4 @@
-## Acceleration sensor sample for Android Things
+## Proximity sensor sample for Android Things
 
 This sample demonstrates how to control the HC-SR04 ultrasonic ranging module
 and integrate it to the Android `SensorManager`.
@@ -22,7 +22,7 @@ If you prefer to run on the command line, from this repository's root directory,
 
 ```bash
 ./gradlew sample-hcsr04:installDebug
-adb shell am start com.leinardi.android.things.sample.hcsr04/.AccelerationActivity
+adb shell am start com.leinardi.android.things.sample.hcsr04/.DistanceActivity
 ```
 
 If you have everything set up correctly, in the logcat will be printed the values
