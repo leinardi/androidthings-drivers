@@ -4,7 +4,9 @@ sudo: true
 
 os:
   - linux
-
+addons:
+  apt_packages:
+    - pandoc
 before_install:
   - mkdir -p $ANDROID_HOME/licenses
   - echo "8933bad161af4178b1185d1a37fbf41ea5269c55" > $ANDROID_HOME/licenses/android-sdk-license
@@ -22,4 +24,6 @@ android:
     - android-sdk-license-.+
     - google-gdk-license-.+
 
-script: ./gradlew clean check --profile
+script:
+  - ./gradlew clean check --profile
+  - pandoc `ls -1rt build/reports/profile/profile-*.html | tail -n1` -t plain
