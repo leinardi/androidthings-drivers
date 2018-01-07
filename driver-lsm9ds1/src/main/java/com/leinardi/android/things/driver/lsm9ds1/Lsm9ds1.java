@@ -452,7 +452,7 @@ public class Lsm9ds1 implements Closeable {
      *
      * @throws IOException
      */
-    public boolean getAccelerometerHighResolution() throws IOException {
+    public boolean isAccelerometerHighResolution() throws IOException {
         byte reg = readRegByte(SENSOR_XG, REGISTER_CTRL_REG6_XL);
         return (byte) ((reg & 0b10000000) & 0xFF) == CTRL_REG7_XL_HR;
     }
@@ -730,7 +730,7 @@ public class Lsm9ds1 implements Closeable {
      *
      * @throws IOException
      */
-    public boolean getMagnetometerTemperatureCompensation() throws IOException {
+    public boolean isMagnetometerTemperatureCompensation() throws IOException {
         byte reg = readRegByte(SENSOR_MAG, REGISTER_CTRL_REG1_M);
         return (byte) ((reg & CTRL_REG1_M_TEMP_COMP) & 0xFF) == CTRL_REG1_M_TEMP_COMP;
     }
