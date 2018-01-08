@@ -16,6 +16,7 @@
 
 package com.leinardi.android.things.driver.ds3231;
 
+import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -24,11 +25,18 @@ import com.google.android.things.pio.PeripheralManagerService;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+
+import static com.leinardi.android.things.driver.ds3231.Ds3231.SquareWaveOutputFrequency.FREQUENCY_1024_HZ;
+import static com.leinardi.android.things.driver.ds3231.Ds3231.SquareWaveOutputFrequency.FREQUENCY_1_HZ;
+import static com.leinardi.android.things.driver.ds3231.Ds3231.SquareWaveOutputFrequency.FREQUENCY_4096_HZ;
+import static com.leinardi.android.things.driver.ds3231.Ds3231.SquareWaveOutputFrequency.FREQUENCY_8192_HZ;
 
 /**
  * Driver for controlling the DS3231 real-time clock (RTC).
@@ -88,7 +96,7 @@ public class Ds3231 implements Closeable {
      * CC , the oscillator is always on regardless of the status of the EOSC bit. When EOSC is disabled, all register
      * data is static.
      */
-    private static final int RTC_CONTROL_REG_ENABLE_OSCILLATOR = 0b1000_0000;
+    private static final int RTC_CONTROL_REG_DISABLE_OSCILLATOR = 0b1000_0000;
     /**
      * When set to logic 1 with INTCN = 0 and V CC < V PF, this bit enables the square wave. When BBSQW is logic 0,
      * the INT/SQW pin goes high impedance when V CC < V PF. This bit is disabled (logic 0) when power is first
@@ -263,6 +271,10 @@ public class Ds3231 implements Closeable {
         }
     }
 
+    public void setTime(long timeInMillis) throws IOException {
+        setTime(new Date(timeInMillis));
+    }
+
     public void setTime(Date date) throws IOException {
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone(ZoneOffset.UTC));
         calendar.setTime(date);
@@ -285,10 +297,6 @@ public class Ds3231 implements Closeable {
         setOscillator(true);
         setTimekeepingDataValid(true);
         writeRegBuffer(RTC_SECONDS_REG, buffer, buffer.length);
-    }
-
-    public void setTime(long timeInMillis) throws IOException {
-        setTime(new Date(timeInMillis));
     }
 
     public long getTimeInMillis() throws IOException {
@@ -315,25 +323,58 @@ public class Ds3231 implements Closeable {
     }
 
     public boolean isOscillatorEnabled() throws IOException {
-        return ((readRegByte(RTC_CONTROL_REG) & 0xFF) & RTC_CONTROL_REG_ENABLE_OSCILLATOR)
-                == RTC_CONTROL_REG_ENABLE_OSCILLATOR;
+        return ((readRegByte(RTC_CONTROL_REG) & 0xFF) & RTC_CONTROL_REG_DISABLE_OSCILLATOR)
+                != RTC_CONTROL_REG_DISABLE_OSCILLATOR;
     }
 
     public void setOscillator(boolean enabled) throws IOException {
         byte reg = readRegByte(RTC_CONTROL_REG);
-        reg &= ~(RTC_CONTROL_REG_ENABLE_OSCILLATOR);
-        if (enabled) {
-            reg |= RTC_CONTROL_REG_ENABLE_OSCILLATOR;
+        reg &= ~(RTC_CONTROL_REG_DISABLE_OSCILLATOR);
+        if (!enabled) {
+            reg |= RTC_CONTROL_REG_DISABLE_OSCILLATOR;
         }
         writeRegByte(RTC_CONTROL_REG, reg);
     }
 
-    public boolean is32khz() {
-        return false;
+    public boolean is32khz() throws IOException {
+        return ((readRegByte(RTC_STATUS_REG) & 0xFF) & RTC_STATUS_REG_ENABLE_32KHZ_OUTPUT)
+                == RTC_STATUS_REG_ENABLE_32KHZ_OUTPUT;
     }
 
-    public void set32khz(boolean enabled) {
+    public void set32khz(boolean enabled) throws IOException {
+        byte reg = readRegByte(RTC_STATUS_REG);
+        reg &= ~(RTC_STATUS_REG_ENABLE_32KHZ_OUTPUT);
+        if (enabled) {
+            reg |= RTC_STATUS_REG_ENABLE_32KHZ_OUTPUT;
+        }
+        writeRegByte(RTC_STATUS_REG, reg);
+    }
 
+    public boolean isSquareWaveEnabled() throws IOException {
+        return ((readRegByte(RTC_CONTROL_REG) & 0xFF) & RTC_CONTROL_REG_BATTERY_BACKED_SQUARE_WAVE_ENABLE)
+                == RTC_CONTROL_REG_BATTERY_BACKED_SQUARE_WAVE_ENABLE;
+    }
+
+    public void setSquareWave(boolean enabled) throws IOException {
+        byte reg = readRegByte(RTC_CONTROL_REG);
+        reg &= ~(RTC_CONTROL_REG_BATTERY_BACKED_SQUARE_WAVE_ENABLE);
+        if (enabled) {
+            reg |= RTC_CONTROL_REG_BATTERY_BACKED_SQUARE_WAVE_ENABLE;
+        }
+        writeRegByte(RTC_CONTROL_REG, reg);
+    }
+
+    public int getSquareWaveOutputFrequency() throws IOException {
+        return (readRegByte(RTC_CONTROL_REG) & 0xFF) & FREQUENCY_8192_HZ;
+
+    }
+
+    public void setSquareWaveOutputFrequency(@SquareWaveOutputFrequency int squareWaveOutputFrequency) throws
+            IOException {
+        byte reg = readRegByte(RTC_CONTROL_REG);
+        reg &= ~(FREQUENCY_8192_HZ);
+        reg |= squareWaveOutputFrequency;
+        writeRegByte(RTC_CONTROL_REG, reg);
     }
 
     private void forceTemperatureRefresh() throws IOException {
@@ -551,6 +592,39 @@ public class Ds3231 implements Closeable {
     }
 
     /**
+     * Return the current value of the aging offset register.
+     *
+     * @throws IOException
+     */
+    public byte getAgingOffset() throws IOException {
+        return readRegByte(RTC_AGING_REG);
+    }
+
+    /**
+     * The aging offset takes a user-provided value to add to or subtract from the codes in the capacitance array
+     * registers. The code is encoded in two’s complement, with bit 7 representing the sign bit. One LSB represents
+     * one small capacitor to be switched in or out of the capacitance array at the crystal pins. The aging offset
+     * register capacitance value is added or subtracted from the capacitance value that the device calculates for
+     * each temperature compensation. The offset register is added to the capacitance array during a normal
+     * temperature conversion, if the temperature changes from the previous conversion, or during a manual user
+     * conversion (see {@link #readTemperature()}). To see the effects of the aging register on the 32kHz output
+     * frequency immediately, a manual conversion should be started after each aging register change. Positive aging
+     * values add capacitance to the array, slowing the oscillator frequency. Negative values remove capacitance from
+     * the array, increasing the oscillator frequency. The change in ppm per LSB is different at different
+     * temperatures. The frequency vs. temperature curve is shifted by the values used in this register. At +25°C,
+     * one LSB typically provides about 0.1ppm change in frequency. Use of the aging register is not needed to
+     * achieve the accuracy as defined in the EC tables, but could be used to help compensate for aging at a given
+     * temperature.
+     *
+     * @param agingOffset user-provided value to add to or subtract from the codes in the capacitance array
+     *                    registers
+     * @throws IOException
+     */
+    public void setAgingOffset(byte agingOffset) throws IOException {
+        writeRegByte(RTC_AGING_REG, agingOffset);
+    }
+
+    /**
      * Read a byte from a given register.
      *
      * @param reg The register to read from (0x00-0xFF).
@@ -631,6 +705,19 @@ public class Ds3231 implements Closeable {
             throw new IllegalArgumentException("dec must be between 0 and 99 included. dec: " + dec);
         }
         return (byte) (((dec / 10) << 4) + (dec % 10));
+    }
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({FREQUENCY_1_HZ,
+            FREQUENCY_1024_HZ,
+            FREQUENCY_4096_HZ,
+            FREQUENCY_8192_HZ
+    })
+    public @interface SquareWaveOutputFrequency {
+        int FREQUENCY_1_HZ = 0b0000_0000;
+        int FREQUENCY_1024_HZ = 0b0000_1000;
+        int FREQUENCY_4096_HZ = 0b0001_0000;
+        int FREQUENCY_8192_HZ = 0b0001_1000;
     }
 
     private abstract static class Alarm {
