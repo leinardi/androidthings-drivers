@@ -25,6 +25,7 @@ import com.google.android.things.pio.PeripheralManagerService;
 import java.io.Closeable;
 import java.io.IOException;
 import java.time.ZoneOffset;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -33,12 +34,25 @@ import java.util.TimeZone;
  * Driver for controlling the DS3231 real-time clock (RTC).
  */
 public class Ds3231 implements Closeable {
-    public static final int TIMEKEEPING_INVALID = -1;
     /**
      * I2C address for this peripheral
      */
     public static final int I2C_ADDRESS = 0x68;
     public static final float TEMPERATURE_RESOLUTION = 0.25f;
+    public static final int TIMEKEEPING_INVALID = -1;
+    public static final int[] ALARM1_EVERY_SECOND = {0b1000_0000, 0b1000_0000, 0b1000_0000, 0b1000_0000};
+    public static final int[] ALARM1_MATCH_SECONDS = {0b0000_0000, 0b1000_0000, 0b1000_0000, 0b1000_0000};
+    public static final int[] ALARM1_MATCH_MINUTES_SECONDS = {0b0000_0000, 0b0000_0000, 0b1000_0000, 0b1000_0000};
+    public static final int[] ALARM1_MATCH_HOURS_MINUTES_SECONDS = {0b0000_0000, 0b0000_0000, 0b0000_0000, 0b1000_0000};
+    public static final int[] ALARM1_MATCH_DAY_OF_MONTH_HOURS_MINUTES_SECONDS = {0b0000_0000, 0b0000_0000,
+            0b0000_0000, 0b0000_0000};
+    public static final int[] ALARM1_MATCH_DAY_OF_WEEK_HOURS_MINUTES_SECONDS = {0b0000_0000, 0b0000_0000,
+            0b0000_0000, 0b0100_0000};
+    public static final int[] ALARM2_EVERY_MINUTE = {0b1000_0000, 0b1000_0000, 0b1000_0000};
+    public static final int[] ALARM2_MATCH_MINUTES = {0b0000_0000, 0b1000_0000, 0b1000_0000};
+    public static final int[] ALARM2_MATCH_HOURS_MINUTES = {0b0000_0000, 0b0000_0000, 0b1000_0000};
+    public static final int[] ALARM2_MATCH_DAY_OF_MONTH_HOURS_MINUTES = {0b0000_0000, 0b0000_0000, 0b0000_0000};
+    public static final int[] ALARM2_MATCH_DAY_OF_WEEK_HOURS_MINUTES = {0b0000_0000, 0b0000_0000, 0b0100_0000};
     private static final String TAG = Ds3231.class.getSimpleName();
     private static final int RTC_SECONDS_REG = 0x00;
     private static final int RTC_MINUTES_REG = 0x01;
@@ -49,8 +63,8 @@ public class Ds3231 implements Closeable {
     private static final int RTC_YEAR_REG = 0x06;
     private static final int ALM1_SECONDS_REG = 0x07;
     private static final int ALM1_MINUTES_REG = 0x08;
-    private static final int ALM1_HOURS_REG = 0x09;
     private static final int ALM1_DAYDATE_REG = 0x0A;
+    private static final int ALM1_HOURS_REG = 0x09;
     private static final int ALM2_MINUTES_REG = 0x0B;
     private static final int ALM2_HOURS_REG = 0x0C;
     private static final int ALM2_DAYDATE_REG = 0x0D;
@@ -157,6 +171,23 @@ public class Ds3231 implements Closeable {
      * logic 0. This bit can only be written to logic 0. Attempting to write to logic 1 leaves the value unchanged.
      */
     private static final int RTC_STATUS_REG_ALARM1_FLAG = 0b0000_0001;
+    private static final int[][] ALARM1_RATES = {
+            ALARM1_EVERY_SECOND,
+            ALARM1_MATCH_SECONDS,
+            ALARM1_MATCH_MINUTES_SECONDS,
+            ALARM1_MATCH_HOURS_MINUTES_SECONDS,
+            ALARM1_MATCH_DAY_OF_MONTH_HOURS_MINUTES_SECONDS,
+            ALARM1_MATCH_DAY_OF_WEEK_HOURS_MINUTES_SECONDS
+    };
+    private static final int[] ALARM1_MASK_BITS = {0b1000_0000, 0b1000_0000, 0b1000_0000, 0b1100_0000};
+    private static final int[][] ALARM2_RATES = {
+            ALARM2_EVERY_MINUTE,
+            ALARM2_MATCH_MINUTES,
+            ALARM2_MATCH_HOURS_MINUTES,
+            ALARM2_MATCH_DAY_OF_MONTH_HOURS_MINUTES,
+            ALARM2_MATCH_DAY_OF_WEEK_HOURS_MINUTES
+    };
+    private static final int[] ALARM2_MASK_BITS = {0b1000_0000, 0b1000_0000, 0b1100_0000};
     private I2cDevice mI2cDevice;
 
     /**
@@ -217,17 +248,9 @@ public class Ds3231 implements Closeable {
 
             int second = packetBcdToDec(buffer[0]);
             int minute = packetBcdToDec(buffer[1]);
-            int hour;
-            if (((buffer[2] & 0xFF) & INDICATOR_12_HOURS) == INDICATOR_12_HOURS) {
-                hour = packetBcdToDec((byte) ((buffer[2] & 0xFF) & ~(INDICATOR_12_HOURS | INDICATOR_PM)));
-                if (((buffer[2] & 0xFF) & INDICATOR_PM) == INDICATOR_PM) {
-                    hour += 12;
-                }
-            } else {
-                hour = packetBcdToDec((byte) ((buffer[2] & 0xFF) & ~(INDICATOR_12_HOURS)));
-            }
+            int hour = getHourFromBcd(buffer[2]);
             int day = packetBcdToDec(buffer[4]);
-            int month = packetBcdToDec((byte) (buffer[5] & 0b0001_1111));
+            int month = packetBcdToDec((byte) (buffer[5] & 0b0001_1111)) - 1;
             int century = ((buffer[5] & 0xFF) & RTC_MONTH_REG_CENTURY) == RTC_MONTH_REG_CENTURY ? 2000 : 1900;
             int year = century + packetBcdToDec(buffer[6]);
 
@@ -255,7 +278,7 @@ public class Ds3231 implements Closeable {
         buffer[2] &= ~(INDICATOR_12_HOURS);
         buffer[3] = decToPacketBcd(calendar.get(Calendar.DAY_OF_WEEK));
         buffer[4] = decToPacketBcd(calendar.get(Calendar.DAY_OF_MONTH));
-        buffer[5] = decToPacketBcd(calendar.get(Calendar.MONTH));
+        buffer[5] = decToPacketBcd(calendar.get(Calendar.MONTH) + 1);
         buffer[5] += year > 1999 ? RTC_MONTH_REG_CENTURY : 0;
         buffer[6] = decToPacketBcd(year % 100);
 
@@ -323,6 +346,178 @@ public class Ds3231 implements Closeable {
         int controlReg = readRegByte(RTC_CONTROL_REG) & 0xFF;
         int statusReg = readRegByte(RTC_STATUS_REG) & 0xFF;
         return (controlReg & RTC_CONTROL_REG_CONVERT_TEMPERATURE) != 0 || (statusReg & RTC_STATUS_REG_BUSY) != 0;
+    }
+
+    public boolean isInterruptControlEnable() throws IOException {
+        return ((readRegByte(RTC_CONTROL_REG) & 0xFF) & RTC_CONTROL_REG_INTERRUPT_CONTROL)
+                == RTC_CONTROL_REG_INTERRUPT_CONTROL;
+    }
+
+    public void setInterruptControl(boolean enabled) throws IOException {
+        byte reg = readRegByte(RTC_CONTROL_REG);
+        reg &= ~(RTC_CONTROL_REG_INTERRUPT_CONTROL);
+        if (enabled) {
+            reg |= RTC_CONTROL_REG_INTERRUPT_CONTROL;
+        }
+        writeRegByte(RTC_CONTROL_REG, reg);
+    }
+
+    public boolean isAlarm1InterruptEnable() throws IOException {
+        return ((readRegByte(RTC_CONTROL_REG) & 0xFF) & RTC_CONTROL_REG_ALARM1_INTERRUPT_ENABLE)
+                == RTC_CONTROL_REG_ALARM1_INTERRUPT_ENABLE;
+    }
+
+    public void setAlarm1Interrupt(boolean enabled) throws IOException {
+        byte reg = readRegByte(RTC_CONTROL_REG);
+        reg &= ~(RTC_CONTROL_REG_ALARM1_INTERRUPT_ENABLE);
+        if (enabled) {
+            reg |= RTC_CONTROL_REG_ALARM1_INTERRUPT_ENABLE;
+        }
+        writeRegByte(RTC_CONTROL_REG, reg);
+    }
+
+    public boolean isAlarm1Triggered() throws IOException {
+        return ((readRegByte(RTC_STATUS_REG) & 0xFF) & RTC_STATUS_REG_ALARM1_FLAG) == RTC_STATUS_REG_ALARM1_FLAG;
+    }
+
+    public void resetAlarm1TriggeredStatus() throws IOException {
+        byte reg = readRegByte(RTC_STATUS_REG);
+        reg &= ~(RTC_STATUS_REG_ALARM1_FLAG);
+        writeRegByte(RTC_STATUS_REG, reg);
+    }
+
+    public Alarm1 getAlarm1() throws IOException {
+        byte[] buffer = new byte[4];
+        readRegBuffer(ALM1_SECONDS_REG, buffer, buffer.length);
+
+        int[] alarmRate = getAlarmRate(buffer, ALARM1_RATES, ALARM1_MASK_BITS);
+        clearAlarmMaskBits(buffer, ALARM1_MASK_BITS);
+        int second = packetBcdToDec(buffer[0]);
+        int minute = packetBcdToDec(buffer[1]);
+        int hour = getHourFromBcd(buffer[2]);
+        int day = packetBcdToDec(buffer[3]);
+
+        try {
+            return new Alarm1(alarmRate, day, hour, minute, second);
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Unable to create Alarm1 instance. If you never set the alarm before, this can be the cause of" +
+                    " this problem.", e);
+            return null;
+        }
+    }
+
+    public void setAlarm1(Alarm1 alarm) throws IOException {
+        byte[] buffer = new byte[4];
+
+        buffer[0] = decToPacketBcd(alarm.getSecond());
+        buffer[1] = decToPacketBcd(alarm.getMinute());
+        buffer[2] = decToPacketBcd(alarm.getHourOfDay());
+        buffer[2] &= ~(INDICATOR_12_HOURS);
+        buffer[3] = decToPacketBcd(alarm.getDay());
+
+        for (int i = 0; i < buffer.length; i++) {
+            buffer[i] |= alarm.getAlarmRate()[i];
+        }
+
+        writeRegBuffer(ALM1_SECONDS_REG, buffer, buffer.length);
+        setAlarm1Interrupt(true);
+    }
+
+    public boolean isAlarm2InterruptEnable() throws IOException {
+        return ((readRegByte(RTC_CONTROL_REG) & 0xFF) & RTC_CONTROL_REG_ALARM2_INTERRUPT_ENABLE)
+                == RTC_CONTROL_REG_ALARM2_INTERRUPT_ENABLE;
+    }
+
+    public void setAlarm2Interrupt(boolean enabled) throws IOException {
+        byte reg = readRegByte(RTC_CONTROL_REG);
+        reg &= ~(RTC_CONTROL_REG_ALARM2_INTERRUPT_ENABLE);
+        if (enabled) {
+            reg |= RTC_CONTROL_REG_ALARM2_INTERRUPT_ENABLE;
+        }
+        writeRegByte(RTC_CONTROL_REG, reg);
+    }
+
+    public boolean isAlarm2Triggered() throws IOException {
+        return ((readRegByte(RTC_STATUS_REG) & 0xFF) & RTC_STATUS_REG_ALARM2_FLAG) == RTC_STATUS_REG_ALARM2_FLAG;
+    }
+
+    public void resetAlarm2TriggeredStatus() throws IOException {
+        byte reg = readRegByte(RTC_STATUS_REG);
+        reg &= ~(RTC_STATUS_REG_ALARM2_FLAG);
+        writeRegByte(RTC_STATUS_REG, reg);
+    }
+
+    public Alarm2 getAlarm2() throws IOException {
+        byte[] buffer = new byte[3];
+        readRegBuffer(ALM2_MINUTES_REG, buffer, buffer.length);
+
+        int[] alarmRate = getAlarmRate(buffer, ALARM2_RATES, ALARM2_MASK_BITS);
+        clearAlarmMaskBits(buffer, ALARM2_MASK_BITS);
+        int minute = packetBcdToDec(buffer[0]);
+        int hour = getHourFromBcd(buffer[1]);
+        int day = packetBcdToDec(buffer[2]);
+        try {
+            return new Alarm2(alarmRate, day, hour, minute);
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Unable to create Alarm2 instance. If you never set the alarm before, this can be the cause of" +
+                    " this problem.", e);
+            return null;
+        }
+    }
+
+    public void setAlarm2(Alarm2 alarm) throws IOException {
+        byte[] buffer = new byte[3];
+
+        buffer[0] = decToPacketBcd(alarm.getMinute());
+        buffer[1] = decToPacketBcd(alarm.getHourOfDay());
+        buffer[1] &= ~(INDICATOR_12_HOURS);
+        buffer[2] = decToPacketBcd(alarm.getDay());
+
+        for (int i = 0; i < buffer.length; i++) {
+            buffer[i] |= alarm.getAlarmRate()[i];
+        }
+
+        writeRegBuffer(ALM2_MINUTES_REG, buffer, buffer.length);
+        setAlarm2Interrupt(true);
+    }
+
+    private int[] getAlarmRate(byte[] buffer, int[][] alarmRates, int[] alarmMaskBits) {
+        if (alarmRates.length == 0) {
+            throw new IllegalArgumentException("alarmRates is empty");
+        }
+        if (buffer.length != alarmRates[0].length) {
+            throw new IllegalArgumentException("buffer length and alarmRates length are different");
+        }
+        if (buffer.length != alarmMaskBits.length) {
+            throw new IllegalArgumentException("buffer length and alarmMaskBits length are different");
+        }
+        int[] currentAlarmRate = new int[buffer.length];
+
+        for (int[] alarmRate : alarmRates) {
+            boolean found = true;
+            for (int i = 0; i < buffer.length; i++) {
+                currentAlarmRate[i] = (buffer[i] & 0xFF) & alarmMaskBits[i];
+                if (currentAlarmRate[i] != alarmRate[i]) {
+                    found = false;
+                    break;
+                }
+            }
+            if (found) {
+                return alarmRate;
+            }
+        }
+        Log.e(TAG, "No match found for current alarm rate! Returning current value");
+        return currentAlarmRate;
+    }
+
+    private void clearAlarmMaskBits(byte[] buffer, int[] alarmMaskBits) {
+        if (buffer.length != alarmMaskBits.length) {
+            throw new IllegalArgumentException("buffer length and alarmMaskBits length are different");
+        }
+
+        for (int i = 0; i < buffer.length; i++) {
+            buffer[i] &= ~(alarmMaskBits[i]);
+        }
     }
 
     /**
@@ -414,8 +609,21 @@ public class Ds3231 implements Closeable {
 
     }
 
+    private int getHourFromBcd(byte bcd) {
+        int hour;
+        if (((bcd & 0xFF) & INDICATOR_12_HOURS) == INDICATOR_12_HOURS) {
+            hour = packetBcdToDec((byte) ((bcd & 0xFF) & ~(INDICATOR_12_HOURS | INDICATOR_PM)));
+            if (((bcd & 0xFF) & INDICATOR_PM) == INDICATOR_PM) {
+                hour += 12;
+            }
+        } else {
+            hour = packetBcdToDec((byte) ((bcd & 0xFF) & ~(INDICATOR_12_HOURS)));
+        }
+        return hour;
+    }
+
     private int packetBcdToDec(byte bcd) {
-        return ((bcd >>> 4) * 10) + (bcd & 0xF);
+        return (((bcd & 0xFF) >> 4) * 10) + (bcd & 0xF);
     }
 
     private byte decToPacketBcd(int dec) {
@@ -423,5 +631,140 @@ public class Ds3231 implements Closeable {
             throw new IllegalArgumentException("dec must be between 0 and 99 included. dec: " + dec);
         }
         return (byte) (((dec / 10) << 4) + (dec % 10));
+    }
+
+    private abstract static class Alarm {
+        private final int[] mAlarmRate;
+        private final int mDay;
+        private final int mHourOfDay;
+        private final int mMinute;
+
+        public Alarm(int[] alarmRate, int day, int hourOfDay, int minute) {
+            if (day < 1 || day > 31 || (day > 7
+                    && (alarmRate == ALARM1_MATCH_DAY_OF_WEEK_HOURS_MINUTES_SECONDS
+                    || alarmRate == ALARM2_MATCH_DAY_OF_WEEK_HOURS_MINUTES))) {
+                throw new IllegalArgumentException("Invalid day value. Day: " + day);
+            }
+            if (hourOfDay < 0 || hourOfDay > 23) {
+                throw new IllegalArgumentException("Invalid hourOfDay value. Hour of day: " + hourOfDay);
+            }
+            if (minute < 0 || minute > 59) {
+                throw new IllegalArgumentException("Invalid minute value. Minute: " + minute);
+            }
+
+            mAlarmRate = alarmRate;
+            mDay = day;
+            mHourOfDay = hourOfDay;
+            mMinute = minute;
+        }
+
+        public int[] getAlarmRate() {
+            return mAlarmRate;
+        }
+
+        public int getDay() {
+            return mDay;
+        }
+
+        public int getHourOfDay() {
+            return mHourOfDay;
+        }
+
+        public int getMinute() {
+            return mMinute;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+
+            Alarm alarm = (Alarm) o;
+
+            if (mDay != alarm.mDay) {
+                return false;
+            }
+            if (mHourOfDay != alarm.mHourOfDay) {
+                return false;
+            }
+            if (mMinute != alarm.mMinute) {
+                return false;
+            }
+            return Arrays.equals(mAlarmRate, alarm.mAlarmRate);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = Arrays.hashCode(mAlarmRate);
+            result = 31 * result + mDay;
+            result = 31 * result + mHourOfDay;
+            result = 31 * result + mMinute;
+            return result;
+        }
+    }
+
+    public static class Alarm1 extends Alarm {
+        private final int mSecond;
+
+        public Alarm1(int[] alarmRate, int day, int hourOfDay, int minute, int second) {
+            super(alarmRate, day, hourOfDay, minute);
+            if ((alarmRate != ALARM1_EVERY_SECOND
+                    && alarmRate != ALARM1_MATCH_SECONDS
+                    && alarmRate != ALARM1_MATCH_MINUTES_SECONDS
+                    && alarmRate != ALARM1_MATCH_HOURS_MINUTES_SECONDS
+                    && alarmRate != ALARM1_MATCH_DAY_OF_MONTH_HOURS_MINUTES_SECONDS
+                    && alarmRate != ALARM1_MATCH_DAY_OF_WEEK_HOURS_MINUTES_SECONDS)) {
+                throw new IllegalArgumentException("Invalid alarmRate value");
+            }
+            if (second < 0 || second > 59) {
+                throw new IllegalArgumentException("Invalid second value. Second: " + second);
+            }
+            mSecond = second;
+        }
+
+        public int getSecond() {
+            return mSecond;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            if (!super.equals(o)) {
+                return false;
+            }
+
+            Alarm1 alarm1 = (Alarm1) o;
+
+            return mSecond == alarm1.mSecond;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = super.hashCode();
+            result = 31 * result + mSecond;
+            return result;
+        }
+    }
+
+    public static class Alarm2 extends Alarm {
+        public Alarm2(int[] alarmRate, int day, int hourOfDay, int minute) {
+            super(alarmRate, day, hourOfDay, minute);
+            if ((alarmRate != ALARM2_EVERY_MINUTE
+                    && alarmRate != ALARM2_MATCH_MINUTES
+                    && alarmRate != ALARM2_MATCH_HOURS_MINUTES
+                    && alarmRate != ALARM2_MATCH_DAY_OF_MONTH_HOURS_MINUTES
+                    && alarmRate != ALARM2_MATCH_DAY_OF_WEEK_HOURS_MINUTES)) {
+                throw new IllegalArgumentException("Invalid alarmRate value");
+            }
+        }
     }
 }
