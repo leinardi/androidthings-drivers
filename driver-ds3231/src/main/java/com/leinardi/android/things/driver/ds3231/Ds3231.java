@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 import static com.leinardi.android.things.driver.ds3231.Ds3231.SquareWaveOutputFrequency.FREQUENCY_1024_HZ;
 import static com.leinardi.android.things.driver.ds3231.Ds3231.SquareWaveOutputFrequency.FREQUENCY_1_HZ;
@@ -61,6 +62,9 @@ public class Ds3231 implements Closeable {
     public static final int[] ALARM2_MATCH_HOURS_MINUTES = {0b0000_0000, 0b0000_0000, 0b1000_0000};
     public static final int[] ALARM2_MATCH_DAY_OF_MONTH_HOURS_MINUTES = {0b0000_0000, 0b0000_0000, 0b0000_0000};
     public static final int[] ALARM2_MATCH_DAY_OF_WEEK_HOURS_MINUTES = {0b0000_0000, 0b0000_0000, 0b0100_0000};
+    public static final float MAX_POWER_CONSUMPTION_UA = 650f;
+    public static final float MAX_TEMP_RANGE = 70f;
+    public static final int TEMP_MEASUREMENT_INTERVAL_MS = (int) TimeUnit.SECONDS.toMillis(64);
     private static final String TAG = Ds3231.class.getSimpleName();
     private static final int RTC_SECONDS_REG = 0x00;
     private static final int RTC_MINUTES_REG = 0x01;
@@ -271,10 +275,6 @@ public class Ds3231 implements Closeable {
         }
     }
 
-    public void setTime(long timeInMillis) throws IOException {
-        setTime(new Date(timeInMillis));
-    }
-
     public void setTime(Date date) throws IOException {
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone(ZoneOffset.UTC));
         calendar.setTime(date);
@@ -297,6 +297,10 @@ public class Ds3231 implements Closeable {
         setOscillator(true);
         setTimekeepingDataValid(true);
         writeRegBuffer(RTC_SECONDS_REG, buffer, buffer.length);
+    }
+
+    public void setTime(long timeInMillis) throws IOException {
+        setTime(new Date(timeInMillis));
     }
 
     public long getTimeInMillis() throws IOException {
