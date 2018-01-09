@@ -30,8 +30,9 @@ and the [jpuderer-things-drivers driver from jpuderer](https://github.com/jpuder
 #### Persist on reboot/poweroff system wall clock time
 If you are just interested in persisting the system wall clock time when you reboot or
 power off your device, simply add the line below to your project's `build.gradle`,
-where `<version>` matches the last version of the driver available on [jcenter][jcenter].
-No additional code changes are required.
+where `<version>` matches the last version of the driver available on [jcenter][jcenter].  
+
+_No additional code changes are required_.
 ```
 dependencies {
     implementation 'com.leinardi.android.things:driver-ds3231-receiver:<version>'
