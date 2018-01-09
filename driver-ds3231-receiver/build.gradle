@@ -48,5 +48,5 @@ android {
 dependencies {
     compileOnly deps.androidthings
     implementation deps.support.annotations
-    implementation project(':driver-ds3231')
+    implementation 'com.leinardi.android.things:driver-ds3231:0.1'
 }
