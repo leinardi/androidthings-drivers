@@ -79,6 +79,7 @@ import static com.leinardi.android.things.driver.lsm9ds1.Lsm9ds1.SensorType.SENS
 /**
  * Driver for the LSM9DS1 3D accelerometer, 3D gyroscope, 3D magnetometer and temperature sensor.
  */
+@SuppressWarnings("WeakerAccess")
 public class Lsm9ds1 implements Closeable {
     public static final int I2C_ADDRESS_ACCEL_GYRO = 0x6B;
     public static final int I2C_ADDRESS_MAG = 0x1E;
@@ -452,7 +453,7 @@ public class Lsm9ds1 implements Closeable {
      *
      * @throws IOException
      */
-    public boolean getAccelerometerHighResolution() throws IOException {
+    public boolean isAccelerometerHighResolution() throws IOException {
         byte reg = readRegByte(SENSOR_XG, REGISTER_CTRL_REG6_XL);
         return (byte) ((reg & 0b10000000) & 0xFF) == CTRL_REG7_XL_HR;
     }
@@ -730,7 +731,7 @@ public class Lsm9ds1 implements Closeable {
      *
      * @throws IOException
      */
-    public boolean getMagnetometerTemperatureCompensation() throws IOException {
+    public boolean isMagnetometerTemperatureCompensation() throws IOException {
         byte reg = readRegByte(SENSOR_MAG, REGISTER_CTRL_REG1_M);
         return (byte) ((reg & CTRL_REG1_M_TEMP_COMP) & 0xFF) == CTRL_REG1_M_TEMP_COMP;
     }

@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Driver for controlling the hd44780 LCD via the PCF8574's I2C.
  */
+@SuppressWarnings("WeakerAccess")
 public class Hd44780 implements AutoCloseable {
     private static final String TAG = Hd44780.class.getSimpleName();
     private static final int NANOS_PER_MILLI = (int) TimeUnit.MILLISECONDS.toNanos(1);

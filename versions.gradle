@@ -163,7 +163,7 @@ deps.timber = "com.jakewharton.timber:timber:$versions.timber"
 ext.deps = deps
 
 def build_versions = [:]
-build_versions.min_sdk = 24
+build_versions.min_sdk = 26
 build_versions.target_sdk = 26
 build_versions.build_tools = "26.0.2"
 build_versions.java_version = JavaVersion.VERSION_1_7

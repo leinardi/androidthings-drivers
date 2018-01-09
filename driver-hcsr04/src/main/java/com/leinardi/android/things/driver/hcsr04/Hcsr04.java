@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Driver for the HC-SR04 ultrasonic ranging module.
  */
+@SuppressWarnings("WeakerAccess")
 public class Hcsr04 implements Closeable {
     public static final int MIN_RANGE = 2;
     public static final int MAX_RANGE = 400;
