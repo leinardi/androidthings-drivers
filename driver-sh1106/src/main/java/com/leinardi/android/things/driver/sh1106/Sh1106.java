@@ -28,6 +28,7 @@ import java.util.Arrays;
 /**
  * Driver for controlling the SH1106 OLED display.
  */
+@SuppressWarnings("WeakerAccess")
 public class Sh1106 implements Closeable {
     private static final String TAG = Sh1106.class.getSimpleName();
     private I2cDevice mI2cDevice;

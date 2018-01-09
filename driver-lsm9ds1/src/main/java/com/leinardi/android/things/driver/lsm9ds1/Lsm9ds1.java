@@ -79,6 +79,7 @@ import static com.leinardi.android.things.driver.lsm9ds1.Lsm9ds1.SensorType.SENS
 /**
  * Driver for the LSM9DS1 3D accelerometer, 3D gyroscope, 3D magnetometer and temperature sensor.
  */
+@SuppressWarnings("WeakerAccess")
 public class Lsm9ds1 implements Closeable {
     public static final int I2C_ADDRESS_ACCEL_GYRO = 0x6B;
     public static final int I2C_ADDRESS_MAG = 0x1E;
