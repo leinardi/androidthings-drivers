@@ -66,6 +66,8 @@ public class Ds3231 implements Closeable {
     public static final float MAX_POWER_CONSUMPTION_UA = 650f;
     public static final float MAX_TEMP_RANGE = 70f;
     public static final int TEMP_MEASUREMENT_INTERVAL_MS = (int) TimeUnit.SECONDS.toMillis(64);
+    public static final int MIN_YEAR = 1900;
+    public static final int MAX_YEAR = 2099;
     private static final String TAG = Ds3231.class.getSimpleName();
     private static final int RTC_SECONDS_REG = 0x00;
     private static final int RTC_MINUTES_REG = 0x01;
@@ -236,10 +238,8 @@ public class Ds3231 implements Closeable {
 
     private void connect(I2cDevice device) throws IOException {
         mI2cDevice = device;
-
         // Try to read a register
         isTimekeepingDataValid();
-
     }
 
     @Override
@@ -253,6 +253,12 @@ public class Ds3231 implements Closeable {
         }
     }
 
+    /**
+     * Gets the Real-Time clock.
+     *
+     * @return a {@link Date} containing the Real-Time clock or null if the timekeeping data is not valid.
+     * @throws IOException
+     */
     @Nullable
     public Date getTime() throws IOException {
         if (isTimekeepingDataValid()) {
@@ -276,11 +282,43 @@ public class Ds3231 implements Closeable {
         }
     }
 
+    /**
+     * Sets the Real-Time clock time and calendar data.
+     *
+     * @param timeInMillis the time and calendar data you want to set in milliseconds.
+     * @throws IOException
+     */
+    public void setTime(long timeInMillis) throws IOException {
+        setTime(new Date(timeInMillis));
+    }
+
+    /**
+     * Gets the Real-Time clock in milliseconds.
+     *
+     * @return a {@link Date} containing the Real-Time clock in milliseconds or {@link #TIMEKEEPING_INVALID} if the
+     * timekeeping data is not valid.
+     * @throws IOException
+     */
+    public long getTimeInMillis() throws IOException {
+        Date date = getTime();
+        if (date != null) {
+            return date.getTime();
+        } else {
+            return TIMEKEEPING_INVALID;
+        }
+    }
+
+    /**
+     * Sets the Real-Time clock time and calendar data.
+     *
+     * @param date the time and calendar data you want to set.
+     * @throws IOException
+     */
     public void setTime(Date date) throws IOException {
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone(ZoneOffset.UTC));
         calendar.setTime(date);
         int year = calendar.get(Calendar.YEAR);
-        if (year < 1900 || year > 2099) {
+        if (year < MIN_YEAR || year > MAX_YEAR) {
             throw new IllegalArgumentException("Year must be between 1900 and 2099 included. Year: " + year);
         }
         byte[] buffer = new byte[7];
@@ -296,42 +334,53 @@ public class Ds3231 implements Closeable {
         buffer[6] = decToPacketBcd(year % 100);
 
         setOscillator(true);
-        setTimekeepingDataValid(true);
+        resetTimekeepingDataValid();
         writeRegBuffer(RTC_SECONDS_REG, buffer, buffer.length);
     }
 
-    public void setTime(long timeInMillis) throws IOException {
-        setTime(new Date(timeInMillis));
-    }
-
-    public long getTimeInMillis() throws IOException {
-        Date date = getTime();
-        if (date != null) {
-            return date.getTime();
-        } else {
-            return TIMEKEEPING_INVALID;
-        }
-    }
-
+    /**
+     * Indicates the validity of the timekeeping data.
+     *
+     * @return true if the timekeeping data is valid, false otherwise.
+     * @throws IOException
+     */
     public boolean isTimekeepingDataValid() throws IOException {
         return ((readRegByte(RTC_STATUS_REG) & 0xFF) & RTC_STATUS_REG_OSCILLATOR_STOP_FLAG)
                 != RTC_STATUS_REG_OSCILLATOR_STOP_FLAG;
     }
 
-    private void setTimekeepingDataValid(boolean valid) throws IOException {
+    /**
+     * Marks the timekeeping data as valid.
+     *
+     * @throws IOException
+     */
+    private void resetTimekeepingDataValid() throws IOException {
         byte reg = readRegByte(RTC_STATUS_REG);
         reg &= ~(RTC_STATUS_REG_OSCILLATOR_STOP_FLAG);
-        if (!valid) {
-            reg |= RTC_STATUS_REG_OSCILLATOR_STOP_FLAG;
-        }
         writeRegByte(RTC_STATUS_REG, reg);
     }
 
+    /**
+     * Current status of the oscillator
+     *
+     * @return True if enabled, false if disabled.
+     * @throws IOException
+     */
     public boolean isOscillatorEnabled() throws IOException {
         return ((readRegByte(RTC_CONTROL_REG) & 0xFF) & RTC_CONTROL_REG_DISABLE_OSCILLATOR)
                 != RTC_CONTROL_REG_DISABLE_OSCILLATOR;
     }
 
+    /**
+     * Starts, stops the oscillator.
+     * <p>
+     * It is set to true when power is first applied. When the DS3231 is powered by V CC, the
+     * oscillator is always on regardless of the value send. When disabled, all register data is static.
+     *
+     * @param enabled When set to true, the oscillator is started. When set to false, the oscillator is stopped when
+     *                the DS3231 switches to V BAT.
+     * @throws IOException
+     */
     public void setOscillator(boolean enabled) throws IOException {
         byte reg = readRegByte(RTC_CONTROL_REG);
         reg &= ~(RTC_CONTROL_REG_DISABLE_OSCILLATOR);
@@ -341,11 +390,26 @@ public class Ds3231 implements Closeable {
         writeRegByte(RTC_CONTROL_REG, reg);
     }
 
+    /**
+     * Get the status of the 32kHz pin.
+     *
+     * @return true if the 32kHz outputs is enablee, false if is disabled.
+     * @throws IOException
+     */
     public boolean is32khz() throws IOException {
         return ((readRegByte(RTC_STATUS_REG) & 0xFF) & RTC_STATUS_REG_ENABLE_32KHZ_OUTPUT)
                 == RTC_STATUS_REG_ENABLE_32KHZ_OUTPUT;
     }
 
+    /**
+     * Controls the status of the 32kHz pin. When set to true, the 32kHz pin is enabled and outputs a 32.768kHz
+     * square-wave signal. When set to false, the 32kHz pin goes to a high-impedance state. The initial power-up
+     * state of this bit is true, and a 32.768kHz square-wave signal appears at the 32kHz pin after a power source is
+     * applied to the DS3231 (if the oscillator is running).
+     *
+     * @param enabled true to enable the 32kHz outputs, false to disable it.
+     * @throws IOException
+     */
     public void set32khz(boolean enabled) throws IOException {
         byte reg = readRegByte(RTC_STATUS_REG);
         reg &= ~(RTC_STATUS_REG_ENABLE_32KHZ_OUTPUT);
@@ -355,11 +419,26 @@ public class Ds3231 implements Closeable {
         writeRegByte(RTC_STATUS_REG, reg);
     }
 
+    /**
+     * Current status of the square wave
+     *
+     * @return True if enabled, false if disabled.
+     * @throws IOException
+     */
     public boolean isSquareWaveEnabled() throws IOException {
         return ((readRegByte(RTC_CONTROL_REG) & 0xFF) & RTC_CONTROL_REG_BATTERY_BACKED_SQUARE_WAVE_ENABLE)
                 == RTC_CONTROL_REG_BATTERY_BACKED_SQUARE_WAVE_ENABLE;
     }
 
+    /**
+     * Enable/disable the square wave.
+     * <p>
+     * It is set to false when power is first applied.
+     *
+     * @param enabled When set to true with {@link #isInterruptControlEnable()} equals false and V CC < V PF , it
+     *                enables the square wave. When false, the INT/SQW pin goes high impedance when V CC < V PF.
+     * @throws IOException
+     */
     public void setSquareWave(boolean enabled) throws IOException {
         byte reg = readRegByte(RTC_CONTROL_REG);
         reg &= ~(RTC_CONTROL_REG_BATTERY_BACKED_SQUARE_WAVE_ENABLE);
@@ -369,11 +448,23 @@ public class Ds3231 implements Closeable {
         writeRegByte(RTC_CONTROL_REG, reg);
     }
 
+    /**
+     * Gets the current square-wave output frequency.
+     *
+     * @return
+     * @throws IOException
+     */
     public int getSquareWaveOutputFrequency() throws IOException {
         return (readRegByte(RTC_CONTROL_REG) & 0xFF) & FREQUENCY_8192_HZ;
 
     }
 
+    /**
+     * Sets the frequency of the square-wave output when the square wave has been enabled.
+     *
+     * @param squareWaveOutputFrequency one of the values of {@link SquareWaveOutputFrequency}.
+     * @throws IOException
+     */
     public void setSquareWaveOutputFrequency(@SquareWaveOutputFrequency int squareWaveOutputFrequency) throws
             IOException {
         byte reg = readRegByte(RTC_CONTROL_REG);
@@ -382,23 +473,84 @@ public class Ds3231 implements Closeable {
         writeRegByte(RTC_CONTROL_REG, reg);
     }
 
-    private void forceTemperatureRefresh() throws IOException {
+    /**
+     * Forces the temperature sensor to convert the temperature into digital code and execute the TCXO algorithm to
+     * update the capacitance array to the oscillator. This can only happen when a conversion is not already in
+     * progress. The user should check {@link #isTemperatureRefreshing()} before forcing the controller to start a
+     * new TCXO execution. A user-initiated temperature conversion does not affect the internal 64-second update cycle.
+     *
+     * @throws IOException
+     */
+    public void forceTemperatureRefresh() throws IOException {
         byte reg = readRegByte(RTC_CONTROL_REG);
         reg |= RTC_CONTROL_REG_CONVERT_TEMPERATURE;
         writeRegByte(RTC_CONTROL_REG, reg);
     }
 
-    private boolean isTemperatureRefreshing() throws IOException {
+    /**
+     * Indicates the device is busy executing TCXO functions.
+     *
+     * @return true when the conversion signal to the temperature sensor is asserted, false otherwise.
+     * @throws IOException
+     */
+    public boolean isTemperatureRefreshing() throws IOException {
         int controlReg = readRegByte(RTC_CONTROL_REG) & 0xFF;
         int statusReg = readRegByte(RTC_STATUS_REG) & 0xFF;
         return (controlReg & RTC_CONTROL_REG_CONVERT_TEMPERATURE) != 0 || (statusReg & RTC_STATUS_REG_BUSY) != 0;
     }
 
+    /**
+     * Get the temperature of the sensor in degrees Celsius.
+     * <p>
+     * The intent of the temperature sensor is to keep track of the die temperature and compensate the crystal
+     * oscillator if necessary. It is not intended as an environmental sensor.
+     *
+     * @return the temperature in degrees Celsius.
+     * @throws IOException
+     */
+    public float readTemperature() throws IOException {
+        boolean alreadyBusy = ((readRegByte(RTC_STATUS_REG) & 0xFF) & RTC_STATUS_REG_BUSY) == RTC_STATUS_REG_BUSY;
+        if (!alreadyBusy) {
+            forceTemperatureRefresh();
+        }
+
+        while (isTemperatureRefreshing()) {
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+                Log.e(TAG, "Sleep interrupted", e);
+                Thread.currentThread().interrupt();
+                break;
+            }
+        }
+
+        byte[] buffer = new byte[2];
+        readRegBuffer(RTC_TEMP_MSB_REG, buffer, buffer.length);
+        return ((int) buffer[0]) + TEMPERATURE_RESOLUTION * ((buffer[1] >> 6) & 0xF);
+    }
+
+    /**
+     * Current status of the interrupt control
+     *
+     * @return True if enabled, false if disabled.
+     * @throws IOException
+     */
     public boolean isInterruptControlEnable() throws IOException {
         return ((readRegByte(RTC_CONTROL_REG) & 0xFF) & RTC_CONTROL_REG_INTERRUPT_CONTROL)
                 == RTC_CONTROL_REG_INTERRUPT_CONTROL;
     }
 
+    /**
+     * Controls the INT/SQW signal.
+     * <p>
+     * The corresponding alarm flag is always set regardless of the state of the value.
+     * It is set to true when power is first applied.
+     *
+     * @param enabled When set to false, a square wave is output on the INT/SQW pin. When set to ture, then a match
+     *                between the timekeeping registers and either of the alarm registers activates the INT/SQW
+     *                output (if the alarm is also enabled).
+     * @throws IOException
+     */
     public void setInterruptControl(boolean enabled) throws IOException {
         byte reg = readRegByte(RTC_CONTROL_REG);
         reg &= ~(RTC_CONTROL_REG_INTERRUPT_CONTROL);
@@ -408,11 +560,25 @@ public class Ds3231 implements Closeable {
         writeRegByte(RTC_CONTROL_REG, reg);
     }
 
+    /**
+     * Current status of the alarm 1 interrupt.
+     *
+     * @return True if enabled, false if disabled.
+     * @throws IOException
+     */
     public boolean isAlarm1InterruptEnable() throws IOException {
         return ((readRegByte(RTC_CONTROL_REG) & 0xFF) & RTC_CONTROL_REG_ALARM1_INTERRUPT_ENABLE)
                 == RTC_CONTROL_REG_ALARM1_INTERRUPT_ENABLE;
     }
 
+    /**
+     * When set to true, permits the {@link #isAlarm1Triggered()} to assert INT/SQW (when
+     * {@link #isInterruptControlEnable()} is true). When set to false or {@link #isInterruptControlEnable()} is
+     * false, does not initiate the INT/SQW signal. It is disabled (false) when power is first applied.
+     *
+     * @param enabled
+     * @throws IOException
+     */
     public void setAlarm1Interrupt(boolean enabled) throws IOException {
         byte reg = readRegByte(RTC_CONTROL_REG);
         reg &= ~(RTC_CONTROL_REG_ALARM1_INTERRUPT_ENABLE);
@@ -422,16 +588,36 @@ public class Ds3231 implements Closeable {
         writeRegByte(RTC_CONTROL_REG, reg);
     }
 
+    /**
+     * Indicates that the time matched the alarm 1 registers.
+     * <p>
+     * It is cleared only by calling {@link #resetAlarm1TriggeredStatus()}.
+     *
+     * @return true if time matched the alarm 1 registers, false otherwise.
+     * @throws IOException
+     */
     public boolean isAlarm1Triggered() throws IOException {
         return ((readRegByte(RTC_STATUS_REG) & 0xFF) & RTC_STATUS_REG_ALARM1_FLAG) == RTC_STATUS_REG_ALARM1_FLAG;
     }
 
+    /**
+     * Clears the alarm 1 triggered status.
+     *
+     * @throws IOException
+     */
     public void resetAlarm1TriggeredStatus() throws IOException {
         byte reg = readRegByte(RTC_STATUS_REG);
         reg &= ~(RTC_STATUS_REG_ALARM1_FLAG);
         writeRegByte(RTC_STATUS_REG, reg);
     }
 
+    /**
+     * Gets the time-of-day/date alarm 1.
+     *
+     * @return time-of-day/date alarm 1 or null if data from register is not valid (eg. was never set).
+     * @throws IOException
+     */
+    @Nullable
     public Alarm1 getAlarm1() throws IOException {
         byte[] buffer = new byte[4];
         readRegBuffer(ALM1_SECONDS_REG, buffer, buffer.length);
@@ -452,6 +638,12 @@ public class Ds3231 implements Closeable {
         }
     }
 
+    /**
+     * Sets the time-of-day/date alarm 1.
+     *
+     * @param alarm time-of-day/date alarm
+     * @throws IOException
+     */
     public void setAlarm1(Alarm1 alarm) throws IOException {
         byte[] buffer = new byte[4];
 
@@ -469,6 +661,12 @@ public class Ds3231 implements Closeable {
         setAlarm1Interrupt(true);
     }
 
+    /**
+     * Current status of the alarm 2 interrupt.
+     *
+     * @return True if enabled, false if disabled.
+     * @throws IOException
+     */
     public boolean isAlarm2InterruptEnable() throws IOException {
         return ((readRegByte(RTC_CONTROL_REG) & 0xFF) & RTC_CONTROL_REG_ALARM2_INTERRUPT_ENABLE)
                 == RTC_CONTROL_REG_ALARM2_INTERRUPT_ENABLE;
@@ -483,16 +681,36 @@ public class Ds3231 implements Closeable {
         writeRegByte(RTC_CONTROL_REG, reg);
     }
 
+    /**
+     * Indicates that the time matched the alarm 2 registers.
+     * <p>
+     * It is cleared only by calling {@link #resetAlarm1TriggeredStatus()}.
+     *
+     * @return true if time matched the alarm 2 registers, false otherwise.
+     * @throws IOException
+     */
     public boolean isAlarm2Triggered() throws IOException {
         return ((readRegByte(RTC_STATUS_REG) & 0xFF) & RTC_STATUS_REG_ALARM2_FLAG) == RTC_STATUS_REG_ALARM2_FLAG;
     }
 
+    /**
+     * Clears the alarm 2 triggered status.
+     *
+     * @throws IOException
+     */
     public void resetAlarm2TriggeredStatus() throws IOException {
         byte reg = readRegByte(RTC_STATUS_REG);
         reg &= ~(RTC_STATUS_REG_ALARM2_FLAG);
         writeRegByte(RTC_STATUS_REG, reg);
     }
 
+    /**
+     * Gets the time-of-day/date alarm 2.
+     *
+     * @return time-of-day/date alarm 2 or null if data from register is not valid (eg. was never set).
+     * @throws IOException
+     */
+    @Nullable
     public Alarm2 getAlarm2() throws IOException {
         byte[] buffer = new byte[3];
         readRegBuffer(ALM2_MINUTES_REG, buffer, buffer.length);
@@ -511,6 +729,12 @@ public class Ds3231 implements Closeable {
         }
     }
 
+    /**
+     * Sets the time-of-day/date alarm 2.
+     *
+     * @param alarm time-of-day/date alarm
+     * @throws IOException
+     */
     public void setAlarm2(Alarm2 alarm) throws IOException {
         byte[] buffer = new byte[3];
 
@@ -567,36 +791,6 @@ public class Ds3231 implements Closeable {
     }
 
     /**
-     * Get the temperature of the sensor in degrees Celsius.
-     * <p>
-     * The intent of the temperature sensor is to keep track of the die temperature and compensate the crystal
-     * oscillator if necessary. It is not intended as an environmental sensor.
-     *
-     * @return the temperature in degrees Celsius.
-     * @throws IOException
-     */
-    public float readTemperature() throws IOException {
-        boolean alreadyBusy = ((readRegByte(RTC_STATUS_REG) & 0xFF) & RTC_STATUS_REG_BUSY) == RTC_STATUS_REG_BUSY;
-        if (!alreadyBusy) {
-            forceTemperatureRefresh();
-        }
-
-        while (isTemperatureRefreshing()) {
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException e) {
-                Log.e(TAG, "Sleep interrupted", e);
-                Thread.currentThread().interrupt();
-                break;
-            }
-        }
-
-        byte[] buffer = new byte[2];
-        readRegBuffer(RTC_TEMP_MSB_REG, buffer, buffer.length);
-        return ((int) buffer[0]) + TEMPERATURE_RESOLUTION * ((buffer[1] >> 6) & 0xF);
-    }
-
-    /**
      * Return the current value of the aging offset register.
      *
      * @throws IOException
@@ -612,7 +806,7 @@ public class Ds3231 implements Closeable {
      * register capacitance value is added or subtracted from the capacitance value that the device calculates for
      * each temperature compensation. The offset register is added to the capacitance array during a normal
      * temperature conversion, if the temperature changes from the previous conversion, or during a manual user
-     * conversion (see {@link #readTemperature()}). To see the effects of the aging register on the 32kHz output
+     * conversion (see {@link #forceTemperatureRefresh()}). To see the effects of the aging register on the 32kHz output
      * frequency immediately, a manual conversion should be started after each aging register change. Positive aging
      * values add capacitance to the array, slowing the oscillator frequency. Negative values remove capacitance from
      * the array, increasing the oscillator frequency. The change in ppm per LSB is different at different
@@ -802,6 +996,20 @@ public class Ds3231 implements Closeable {
     public static class Alarm1 extends Alarm {
         private final int mSecond;
 
+        /**
+         * Obtains an instance of {@link Alarm1} from alarmRate, day, hour, minute, second.
+         *
+         * @param alarmRate One of {@link #ALARM1_EVERY_SECOND}, {@link #ALARM1_MATCH_SECONDS},
+         *                  {@link #ALARM1_MATCH_MINUTES_SECONDS}, {@link #ALARM1_MATCH_HOURS_MINUTES_SECONDS},
+         *                  {@link #ALARM1_MATCH_DAY_OF_MONTH_HOURS_MINUTES_SECONDS},
+         *                  {@link #ALARM1_MATCH_DAY_OF_WEEK_HOURS_MINUTES_SECONDS}.
+         * @param day       the day to represent, from 1 to 31 if alarmRate is
+         *                  {@link #ALARM2_MATCH_DAY_OF_MONTH_HOURS_MINUTES}, from 1 to 7 if alarmRate is
+         *                  {@link #ALARM2_MATCH_DAY_OF_WEEK_HOURS_MINUTES},
+         * @param hourOfDay the hour-of-day to represent, from 0 to 23
+         * @param minute    the minute-of-hour to represent, from 0 to 59
+         * @param second    the second-of-minute to represent, from 0 to 59
+         */
         public Alarm1(int[] alarmRate, int day, int hourOfDay, int minute, int second) {
             super(alarmRate, day, hourOfDay, minute);
             if ((alarmRate != ALARM1_EVERY_SECOND
@@ -848,6 +1056,18 @@ public class Ds3231 implements Closeable {
     }
 
     public static class Alarm2 extends Alarm {
+        /**
+         * Obtains an instance of {@link Alarm2} from alarmRate, day, hour, minute, second.
+         *
+         * @param alarmRate One of {@link #ALARM2_EVERY_MINUTE}, {@link #ALARM2_MATCH_MINUTES},
+         *                  {@link #ALARM2_MATCH_HOURS_MINUTES}, {@link #ALARM2_MATCH_DAY_OF_MONTH_HOURS_MINUTES},
+         *                  {@link #ALARM2_MATCH_DAY_OF_WEEK_HOURS_MINUTES}.
+         * @param day       the day to represent, from 1 to 31 if alarmRate is
+         *                  {@link #ALARM2_MATCH_DAY_OF_MONTH_HOURS_MINUTES}, from 1 to 7 if alarmRate is
+         *                  {@link #ALARM2_MATCH_DAY_OF_WEEK_HOURS_MINUTES},
+         * @param hourOfDay the hour-of-day to represent, from 0 to 23
+         * @param minute    the minute-of-hour to represent, from 0 to 59
+         */
         public Alarm2(int[] alarmRate, int day, int hourOfDay, int minute) {
             super(alarmRate, day, hourOfDay, minute);
             if ((alarmRate != ALARM2_EVERY_MINUTE
