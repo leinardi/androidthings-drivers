@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.leinardi.android.things.driver.ds3231;
+package com.leinardi.android.things.driver.ds3231.receiver;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -27,6 +27,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.android.things.device.TimeManager;
+import com.leinardi.android.things.driver.ds3231.Ds3231;
 
 import java.io.IOException;
 

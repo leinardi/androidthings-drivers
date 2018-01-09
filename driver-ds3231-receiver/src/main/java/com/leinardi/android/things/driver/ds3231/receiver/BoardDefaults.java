@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.leinardi.android.things.driver.ds3231;
+package com.leinardi.android.things.driver.ds3231.receiver;
 
 import android.os.Build;
 import android.util.Log;

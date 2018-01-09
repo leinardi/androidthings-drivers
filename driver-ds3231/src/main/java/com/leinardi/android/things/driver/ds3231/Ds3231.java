@@ -42,6 +42,7 @@ import static com.leinardi.android.things.driver.ds3231.Ds3231.SquareWaveOutputF
 /**
  * Driver for controlling the DS3231 real-time clock (RTC).
  */
+@SuppressWarnings("WeakerAccess")
 public class Ds3231 implements Closeable {
     /**
      * I2C address for this peripheral

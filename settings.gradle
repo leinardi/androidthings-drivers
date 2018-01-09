@@ -15,4 +15,4 @@
  */
 
 include ':driver-sh1106', ':sample-sh1106', ':driver-hd44780', ':sample-hd44780', ':driver-lsm9ds1', ':sample-lsm9ds1',
-        ':driver-hcsr04', ':sample-hcsr04', ':driver-ds3231', ':sample-ds3231'
+        ':driver-hcsr04', ':sample-hcsr04', ':driver-ds3231', 'driver-ds3231-receiver', ':sample-ds3231'

@@ -14,12 +14,25 @@
   ~ limitations under the License.
   -->
 
-<manifest package="com.leinardi.android.things.driver.ds3231"
+<manifest package="com.leinardi.android.things.driver.ds3231.receiver"
     xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="com.google.android.things.permission.CHANGE_TIME" />
 
     <application>
         <uses-library
             android:name="com.google.android.things"
             android:required="false" />
+        <receiver
+            android:name=".Ds3231Receiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.TIME_SET" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>

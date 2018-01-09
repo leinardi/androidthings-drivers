@@ -26,6 +26,7 @@ import com.google.android.things.userdriver.UserSensorReading;
 import java.io.IOException;
 import java.util.UUID;
 
+@SuppressWarnings("WeakerAccess")
 public class Ds3231SensorDriver implements AutoCloseable {
     // DRIVER parameters
     // documented at https://source.android.com/devices/sensors/hal-interface.html#sensor_t
