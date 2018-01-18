@@ -18,44 +18,37 @@ package com.leinardi.android.things.driver.epaperdriverhat;
 
 import android.graphics.Bitmap;
 
-class BitmapHelper {
+public class BitmapHelper {
+    private static final int GRADIENT_CUTOFF = 85; // Tune for gradient picker on grayscale images.
+
     private BitmapHelper() {
     }
 
-    private static final int GRADIENT_CUTOFF = 170; // Tune for gradient picker on grayscale images.
-
     /**
-     * Converts a bitmap image to LCD screen data and returns the screen data as bytes.
+     * Converts a bitmap image to LCD screen data and sets it on the given screen at the specified
+     * offset.
      *
-     * @param buffer    The screen's data buffer.
-     * @param offset    The byte offset to start writing screen bitmap data at.
+     * @param mScreen   The e-paper screen to write the bitmap data to.
+     * @param xOffset   The horizontal offset to draw the image at.
+     * @param yOffset   The vertical offset to draw the image at.
      * @param bmp       The bitmap image that you want to convert to screen data.
-     * @param drawWhite Set to true to draw white pixels, false to draw pixels based on gradient.
-     * @return A byte array with pixel data for the E-Paper Driver HAT.
+     * @param drawWhite true for drawing only white pixels, false for drawing grayscale pixel
+     *                  based on {@link #GRADIENT_CUTOFF}.
      */
-    static void bmpToBytes(byte[] buffer, int offset, Bitmap bmp, boolean drawWhite) {
+    public static void setBmpData(Epd mScreen, int xOffset, int yOffset, Bitmap bmp, boolean drawWhite) {
         int width = bmp.getWidth();
         int height = bmp.getHeight();
 
-        // Each byte stored in memory represents 8 vertical pixels.  As such, you must fill the
-        // memory with pixel data moving vertically top-down through the image and scrolling
-        // across, while appending the vertical pixel data by series of 8.
-        for (int y = 0; y < height; y += 8) {
+        for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                int bytePos = (offset + x) + ((y / 8) * width);
-
-                for (int k = 0; k < 8; k++) {
-                    if ((k + y < height) && (bytePos < buffer.length)) {
-                        int pixel = bmp.getPixel(x, y + k);
-                        if (!drawWhite) { // Look at Alpha channel instead
-                            if ((pixel & 0xFF) > GRADIENT_CUTOFF) {
-                                buffer[bytePos] |= 1 << k;
-                            }
-                        } else {
-                            if (pixel == -1) { // Only draw white pixels
-                                buffer[bytePos] |= 1 << k;
-                            }
-                        }
+                int pixel = bmp.getPixel(x, y);
+                if (!drawWhite) { // Look at Alpha channel instead
+                    if ((pixel & 0xFF) <= GRADIENT_CUTOFF) {
+                        mScreen.setPixel(x + xOffset, y + yOffset, true);
+                    }
+                } else {
+                    if (pixel == -1) { // Only draw white pixels
+                        mScreen.setPixel(x + xOffset, y + yOffset, true);
                     }
                 }
             }

@@ -16,7 +16,10 @@
 
 package com.leinardi.android.things.driver.epaperdriverhat;
 
+import android.graphics.Color;
+
 import java.io.IOException;
+import java.util.Arrays;
 
 public class Gdew075t8Epd extends Epd {
 
@@ -112,11 +115,19 @@ public class Gdew075t8Epd extends Epd {
 
     private static final int PLL_CONTROL_50HZ = 0b0011_1100; // See datasheet page 17
 
-    private static final int VCOM_AND_DATA_INTERVAL_SETTING_DEFAULT_WHITE_BALCK = 0b0111_0111; // See datasheet page 19
+    private static final int VCOM_AND_DATA_INTERVAL_SETTING_DEFAULT_WHITE_BALCK = 0b0110_0111; // See datasheet page 19
+    private static final int VCOM_AND_DATA_INTERVAL_SETTING_INVERT_COLORS = 0b0001_0000; // See datasheet page 19
 
     private static final int TCON_SETTING_DEFAULT_S2G_G2S = 0b0010_0010; // See datasheet page 20
 
     private static final int DEEP_SLEEP_CHECK_CODE = 0b1010_0101;
+
+    private static final int SPI_FLASH_CONTROL_ENABLED = 0b0000_00001;
+    private static final int SPI_FLASH_CONTROL_DISABLED = 0b0000_00000;
+
+    private static final int PIXEL_ON = 0b011;
+
+    private byte[] mBuffer;
 
     public Gdew075t8Epd() throws IOException {
     }
@@ -128,8 +139,61 @@ public class Gdew075t8Epd extends Epd {
     @Override
     protected void configure() throws IOException {
         super.configure();
+        mBuffer = new byte[((getDisplayWidth() * getDisplayHeight()) / 2)];
+    }
 
+    @Override
+    public void clearPixels() {
+        Arrays.fill(mBuffer, 0, mBuffer.length, (byte) 0);
+    }
+
+    @Override
+    public void setPixel(int x, int y, Color color) throws IllegalArgumentException {
+        setPixel(x, y, !color.equals(Color.valueOf(Color.WHITE)));
+    }
+
+    public void setPixel(int x, int y, boolean on) throws IllegalArgumentException {
+        if (x < 0 || y < 0 || x >= getDisplayWidth() || y >= getDisplayHeight()) {
+            throw new IllegalArgumentException("pixel out of bound:" + x + "," + y);
+        }
+        if (on) {
+            mBuffer[x / 2 + (y * getDisplayWidth() / 2)] |= (x % 2 == 0 ? (PIXEL_ON << 4) : PIXEL_ON);
+        } else {
+            mBuffer[x / 2 + (y * getDisplayWidth() / 2)] &= ~(x % 2 == 0 ? (PIXEL_ON << 4) : PIXEL_ON);
+        }
+    }
+
+    @Override
+    public int getDisplayWidth() {
+        return EPD_WIDTH;
+    }
+
+    @Override
+    public int getDisplayHeight() {
+        return EPD_HEIGHT;
+    }
+
+    @Override
+    public void show() throws IOException {
+        wakeUp();
+        sendCommand(DATA_START_TRANSMISSION_1);
+        sendData(mBuffer);
+        sendCommand(DISPLAY_REFRESH);
+        waitUntilIdle();
+        sleep();
+    }
+
+    @Override
+    public void wakeUp() throws IOException {
         reset();
+
+        sendCommand(SPI_FLASH_CONTROL);
+        sendData((byte) SPI_FLASH_CONTROL_ENABLED);
+
+        sendCommand(0xAB);
+
+        sendCommand(SPI_FLASH_CONTROL);
+        sendData((byte) SPI_FLASH_CONTROL_DISABLED);
 
         sendCommand(POWER_SETTING);
         sendData((byte) (POWER_SETTING_VDNS_L
@@ -156,10 +220,6 @@ public class Gdew075t8Epd extends Epd {
         sendData((byte) (BOOSTER_SOFT_START_DRIVING_STRENGTH_6
                 | BOOSTER_SOFT_START_MIN_OFF_TIME_0_26));   // 0b0010_1000
 
-        sendCommand(POWER_ON);
-        waitUntilIdle();
-
-        sendCommand(PLL_CONTROL);
         sendData((byte) PLL_CONTROL_50HZ);
 
         sendCommand(TEMPERATURE_CALIBRATION);
@@ -182,52 +242,21 @@ public class Gdew075t8Epd extends Epd {
 
         sendCommand(FLASH_MODE);
         sendData((byte) 0x03);
-    }
 
-    @Override
-    public int getDisplayWidth() {
-        return EPD_WIDTH;
-    }
-
-    @Override
-    public int getDisplayHeight() {
-        return EPD_HEIGHT;
-    }
-
-    @Override
-    public void showFrame(byte[] frameBuffer) throws IOException {
-        sendCommand(DATA_START_TRANSMISSION_1);
-        for (byte b : frameBuffer) {
-            int temp1 = b;
-            int j = 0;
-            while (j < 8) {
-                int temp2;
-                if ((temp1 & 0x80) != 0) {
-                    temp2 = 0x03;
-                } else {
-                    temp2 = 0x00;
-                }
-                temp2 = (temp2 << 4) & 0xFF;
-                temp1 = (temp1 << 1) & 0xFF;
-                j += 1;
-                if ((temp1 & 0x80) != 0) {
-                    temp2 |= 0x03;
-                } else {
-                    temp2 |= 0x00;
-                }
-                temp1 = (temp1 << 1) & 0xFF;
-                sendData((byte) temp2);
-                j += 1;
-            }
-        }
-        sendCommand(DISPLAY_REFRESH);
-        delay(100);
+        sendCommand(POWER_ON);
         waitUntilIdle();
-
     }
 
     @Override
     public void sleep() throws IOException {
+        sendCommand(SPI_FLASH_CONTROL);
+        sendData((byte) SPI_FLASH_CONTROL_ENABLED);
+
+        sendCommand(0xB9);
+
+        sendCommand(SPI_FLASH_CONTROL);
+        sendData((byte) SPI_FLASH_CONTROL_DISABLED);
+
         sendCommand(POWER_OFF);
         waitUntilIdle();
         sendCommand(DEEP_SLEEP);

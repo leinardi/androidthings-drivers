@@ -16,7 +16,7 @@
 
 package com.leinardi.android.things.driver.epaperdriverhat;
 
-import android.graphics.Bitmap;
+import android.graphics.Color;
 
 import com.google.android.things.pio.Gpio;
 import com.google.android.things.pio.PeripheralManagerService;
@@ -24,7 +24,7 @@ import com.google.android.things.pio.SpiDevice;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.Locale;
+import java.util.Arrays;
 
 /**
  * Driver for controlling the EPAPERDRIVERHAT OLED display.
@@ -45,6 +45,7 @@ public abstract class Epd implements Closeable {
     private static final int SPI_FREQUENCY = 2000000;
     // Clock idle low, data is clocked in on rising edge, output data (change) on falling edge
     private static final int SPI_MODE = SpiDevice.MODE0;
+    private static final int MAX_WRITE_BUFFER_LENGTH = 1024;
     private SpiDevice mSpiDevice;
     /**
      * Reset signal input. The Reset is active Low.
@@ -55,7 +56,6 @@ public abstract class Epd implements Closeable {
      * data. When the pin is pulled Low, the data will be interpreted as command.
      */
     private Gpio mDataCommandPin;
-    //    private Gpio mSpiChipSelectPin;
     /**
      * Busy state output pin. When Busy the operation of chip should not be interrupted and any commands
      * should not be issued to the module.
@@ -94,10 +94,6 @@ public abstract class Epd implements Closeable {
         mBusyPin.setDirection(Gpio.DIRECTION_IN);
     }
 
-    public abstract int getDisplayWidth();
-
-    public abstract int getDisplayHeight();
-
     protected void sendCommand(int command) throws IOException {
         if (mSpiDevice == null) {
             throw new IllegalStateException("SPI device not open");
@@ -117,28 +113,82 @@ public abstract class Epd implements Closeable {
             throw new IllegalStateException("SPI device not open");
         }
         mDataCommandPin.setValue(true);
-        mSpiDevice.write(data, data.length);
+        if (data.length > MAX_WRITE_BUFFER_LENGTH) {
+            for (int i = 0; i < data.length - MAX_WRITE_BUFFER_LENGTH + 1; i += MAX_WRITE_BUFFER_LENGTH) {
+                mSpiDevice.write(Arrays.copyOfRange(data, i, i + MAX_WRITE_BUFFER_LENGTH), MAX_WRITE_BUFFER_LENGTH);
+            }
+
+            if (data.length % MAX_WRITE_BUFFER_LENGTH != 0) {
+                mSpiDevice.write(
+                        Arrays.copyOfRange(data, data.length - data.length % MAX_WRITE_BUFFER_LENGTH, data.length),
+                        data.length % MAX_WRITE_BUFFER_LENGTH);
+            }
+        } else {
+            mSpiDevice.write(data, data.length);
+        }
     }
 
     public void reset() throws IOException {
         mResetPin.setValue(false);
-        delay(200);
+        delay(50);
         mResetPin.setValue(true);
-        delay(200);
+        delay(50);
     }
 
-    protected byte[] getFrameBuffer(Bitmap bitmap) {
-        if (bitmap.getWidth() != getDisplayWidth() || bitmap.getHeight() != getDisplayHeight()) {
-            throw new IllegalArgumentException(String.format(Locale.getDefault(), "'Image must be same dimensions" +
-                            " as display (%dx%d). Bitmap size: %dx%d", getDisplayWidth(), getDisplayHeight(),
-                    bitmap.getWidth(), bitmap.getHeight()));
-        }
-        byte[] buf = new byte[(getDisplayWidth() * getDisplayHeight() / 8)];
-        BitmapHelper.bmpToBytes(buf, 0, bitmap, true);
-        return buf;
-    }
+    /**
+     * @return the width of the display
+     */
+    public abstract int getDisplayWidth();
 
-    public abstract void showFrame(byte[] data) throws IOException;
+    /**
+     * @return the height of the display
+     */
+    public abstract int getDisplayHeight();
+
+    /**
+     * Clears all pixel data in the display buffer. This will be rendered the next time
+     * {@link #show()} is called.
+     */
+    public abstract void clearPixels();
+
+    /**
+     * Sets a specific pixel in the display buffer to on or off. This will be rendered the next time
+     * {@link #show()} is called.
+     *
+     * @param x     The horizontal coordinate.
+     * @param y     The vertical coordinate.
+     * @param color Color of the pixel.
+     */
+    public abstract void setPixel(int x, int y, Color color) throws IllegalArgumentException;
+
+    /**
+     * Sets a specific pixel in the display buffer to on or off. This will be rendered the next time
+     * {@link #show()} is called.
+     *
+     * @param x  The horizontal coordinate.
+     * @param y  The vertical coordinate.
+     * @param on Set to true to enable the pixel; false to disable the pixel.
+     */
+    public abstract void setPixel(int x, int y, boolean on) throws IllegalArgumentException;
+
+//    /**
+//     * Invert the display color without rewriting the contents of the display data RAM..
+//     *
+//     * @param invert Set to true to invert the display color; set to false to set the display back to normal.
+//     * @throws IOException
+//     * @throws IllegalStateException
+//     */
+//    public abstract void setInvertDisplay(boolean invert) throws IOException, IllegalStateException;
+
+    /**
+     * Renders the current pixel data to the screen.
+     *
+     * @throws IOException
+     * @throws IllegalStateException
+     */
+    public abstract void show() throws IOException;
+
+    public abstract void wakeUp() throws IOException;
 
     public abstract void sleep() throws IOException;
 
