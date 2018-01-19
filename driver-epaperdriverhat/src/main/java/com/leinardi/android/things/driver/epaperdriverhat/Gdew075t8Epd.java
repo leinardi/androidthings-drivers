@@ -128,6 +128,7 @@ public class Gdew075t8Epd extends Epd {
     private static final int PIXEL_ON = 0b011;
 
     private byte[] mBuffer;
+    private boolean mInvertColor;
 
     public Gdew075t8Epd() throws IOException {
     }
@@ -164,6 +165,11 @@ public class Gdew075t8Epd extends Epd {
     }
 
     @Override
+    public void setInvertDisplay(boolean invert) throws IOException, IllegalStateException {
+        mInvertColor = invert;
+    }
+
+    @Override
     public int getDisplayWidth() {
         return EPD_WIDTH;
     }
@@ -184,7 +190,7 @@ public class Gdew075t8Epd extends Epd {
     }
 
     @Override
-    public void wakeUp() throws IOException {
+    protected void wakeUp() throws IOException {
         reset();
 
         sendCommand(SPI_FLASH_CONTROL);
@@ -226,7 +232,11 @@ public class Gdew075t8Epd extends Epd {
         sendData((byte) TEMPERATURE_CALIBRATION_INTERNAL);
 
         sendCommand(VCOM_AND_DATA_INTERVAL_SETTING);
-        sendData((byte) VCOM_AND_DATA_INTERVAL_SETTING_DEFAULT_WHITE_BALCK);
+        int vcomAndDataIntervalSetting = VCOM_AND_DATA_INTERVAL_SETTING_DEFAULT_WHITE_BALCK;
+        if (mInvertColor) {
+            vcomAndDataIntervalSetting |= VCOM_AND_DATA_INTERVAL_SETTING_INVERT_COLORS;
+        }
+        sendData((byte) vcomAndDataIntervalSetting);
 
         sendCommand(TCON_SETTING);
         sendData((byte) TCON_SETTING_DEFAULT_S2G_G2S);
@@ -248,7 +258,7 @@ public class Gdew075t8Epd extends Epd {
     }
 
     @Override
-    public void sleep() throws IOException {
+    protected void sleep() throws IOException {
         sendCommand(SPI_FLASH_CONTROL);
         sendData((byte) SPI_FLASH_CONTROL_ENABLED);
 

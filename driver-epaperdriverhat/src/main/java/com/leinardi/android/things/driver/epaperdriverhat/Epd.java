@@ -171,14 +171,14 @@ public abstract class Epd implements Closeable {
      */
     public abstract void setPixel(int x, int y, boolean on) throws IllegalArgumentException;
 
-//    /**
-//     * Invert the display color without rewriting the contents of the display data RAM..
-//     *
-//     * @param invert Set to true to invert the display color; set to false to set the display back to normal.
-//     * @throws IOException
-//     * @throws IllegalStateException
-//     */
-//    public abstract void setInvertDisplay(boolean invert) throws IOException, IllegalStateException;
+    /**
+     * Invert the display color without rewriting the contents of the display data RAM..
+     *
+     * @param invert Set to true to invert the display color; set to false to set the display back to normal.
+     * @throws IOException
+     * @throws IllegalStateException
+     */
+    public abstract void setInvertDisplay(boolean invert) throws IOException, IllegalStateException;
 
     /**
      * Renders the current pixel data to the screen.
@@ -188,9 +188,9 @@ public abstract class Epd implements Closeable {
      */
     public abstract void show() throws IOException;
 
-    public abstract void wakeUp() throws IOException;
+    protected abstract void wakeUp() throws IOException;
 
-    public abstract void sleep() throws IOException;
+    protected abstract void sleep() throws IOException;
 
     protected abstract boolean isBusy() throws IOException;
 
