@@ -45,10 +45,14 @@ public class BitmapHelper {
                 if (!drawWhite) { // Look at Alpha channel instead
                     if ((pixel & 0xFF) <= GRADIENT_CUTOFF) {
                         mScreen.setPixel(x + xOffset, y + yOffset, true);
+                    } else {
+                        mScreen.setPixel(x + xOffset, y + yOffset, false);
                     }
                 } else {
                     if (pixel == -1) { // Only draw white pixels
                         mScreen.setPixel(x + xOffset, y + yOffset, true);
+                    } else {
+                        mScreen.setPixel(x + xOffset, y + yOffset, false);
                     }
                 }
             }

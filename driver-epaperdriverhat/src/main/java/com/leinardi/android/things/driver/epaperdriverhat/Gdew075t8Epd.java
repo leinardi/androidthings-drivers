@@ -64,7 +64,10 @@ public class Gdew075t8Epd extends Epd {
     private static final int AUTO_MEASUREMENT_VCOM = 0x80;
     private static final int READ_VCOM_VALUE = 0x81;
     private static final int VCM_DC_SETTING = 0x82;
-    private static final int FLASH_MODE = 0xe5; // Undocumented
+    private static final int PARTIAL_WINDOW = 0x90; // Undocumented
+    private static final int PARTIAL_IN = 0x91; // Undocumented
+    private static final int PARTIAL_OUT = 0x92; // Undocumented
+    private static final int FLASH_MODE = 0xE5; // Undocumented
 
     private static final int PANEL_SETTING_RES_640X480 = 0b0000_0000;
     private static final int PANEL_SETTING_RES_640X450 = 0b0100_0000;
@@ -126,6 +129,7 @@ public class Gdew075t8Epd extends Epd {
     private static final int SPI_FLASH_CONTROL_DISABLED = 0b0000_00000;
 
     private static final int PIXEL_ON = 0b011;
+    private static final int PARTIAL_UPDATE_DELAY = 500;
 
     private byte[] mBuffer;
     private boolean mInvertColor;
@@ -187,6 +191,45 @@ public class Gdew075t8Epd extends Epd {
         sendCommand(DISPLAY_REFRESH);
         waitUntilIdle();
         sleep();
+    }
+
+    /**
+     * On this display, partial update to display RAM works, but refresh is full screen
+     */
+    private void show(int left, int top, int right, int bottom) throws IOException {
+        int width = right - left;
+        int height = bottom - top;
+
+        byte[] buffer = new byte[((width * height) + 1) / 2];
+        for (int y = top; y < bottom; y++) {
+            for (int x = left; x < right; x++) {
+                byte b = mBuffer[x / 2 + (y * getDisplayWidth() / 2)];
+                if (left == right - 1 && left % 2 == 0) {
+                    b &= ~(0xF);
+                }
+                buffer[((x - left) / 2 + (((y - top) * width) + 1) / 2)] |= (x % 2 == 0 ? (b << 4) : b);
+            }
+        }
+
+        left &= ~(0b0000_0111); // byte boundary
+        right = (right - 1) | 0b0000_0111; // byte boundary - 1
+        sendCommand(PARTIAL_IN);
+        sendCommand(PARTIAL_WINDOW);
+        sendData((byte) (left / 256));
+        sendData((byte) (left % 256));
+        sendData((byte) (right / 256));
+        sendData((byte) (right % 256));
+        sendData((byte) (top / 256));
+        sendData((byte) (top % 256));
+        sendData((byte) (bottom / 256));
+        sendData((byte) (bottom % 256));
+        //sendData(0x01); // Gates scan both inside and outside of the partial window. (default)
+        sendData((byte) 0x00); // Gates scan only inside of the partial window
+
+        sendCommand(DATA_START_TRANSMISSION_1);
+        sendData(buffer);
+        sendCommand(DISPLAY_REFRESH);
+        sendCommand(PARTIAL_OUT);
     }
 
     @Override

@@ -31,9 +31,7 @@ import java.util.Arrays;
  */
 @SuppressWarnings("WeakerAccess")
 public abstract class Epd implements Closeable {
-
     private static final String TAG = Epd.class.getSimpleName();
-
     private static final String EPD_RESET_PIN_RPI = "BCM17";
     private static final String EPD_DATA_COMMAND_PIN_RPI = "BCM25";
     //    private static final String EPD_CS_PIN_RPI = "BCM8";
@@ -246,5 +244,4 @@ public abstract class Epd implements Closeable {
             }
         }
     }
-
 }
