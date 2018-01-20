@@ -36,6 +36,8 @@ bintray {
         licenses = mvn_config.licenses.split(',')
         websiteUrl = mvn_config.website
         issueTrackerUrl = mvn_config.issue_tracker_url
+        githubRepo = mvn_config.githubRepo
+//        githubReleaseNotesFile = mvn_config.githubReleaseNotesFile
         vcsUrl = mvn_config.vcs_url
         labels = mvn_config.tags.split(',')
         version {

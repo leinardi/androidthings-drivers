@@ -25,6 +25,7 @@ mvn_config.issue_tracker_url = 'https://github.com/leinardi/androidthings-driver
 mvn_config.vcs_url = 'https://github.com/leinardi/androidthings-drivers.git'
 mvn_config.description = 'SH1106 display driver for Android Things'
 mvn_config.tags = 'sh1106,android-things,android,raspberry-pi' // Comma separated
+mvn_config.githubRepo = 'leinardi/androidthings-drivers'
 mvn_config.inception_year = '2017'
 mvn_config.dryRun = false
 mvn_config.publish = false
