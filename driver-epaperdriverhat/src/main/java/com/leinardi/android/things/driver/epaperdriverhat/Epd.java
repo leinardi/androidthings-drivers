@@ -153,16 +153,6 @@ public abstract class Epd implements Closeable {
      * Sets a specific pixel in the display buffer to on or off. This will be rendered the next time
      * {@link #show()} is called.
      *
-     * @param x     The horizontal coordinate.
-     * @param y     The vertical coordinate.
-     * @param color Color of the pixel.
-     */
-    public abstract void setPixel(int x, int y, Color color) throws IllegalArgumentException;
-
-    /**
-     * Sets a specific pixel in the display buffer to on or off. This will be rendered the next time
-     * {@link #show()} is called.
-     *
      * @param x  The horizontal coordinate.
      * @param y  The vertical coordinate.
      * @param on Set to true to enable the pixel; false to disable the pixel.

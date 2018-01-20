@@ -16,8 +16,6 @@
 
 package com.leinardi.android.things.driver.epaperdriverhat;
 
-import android.graphics.Color;
-
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -153,10 +151,6 @@ public class Gdew075t8Epd extends Epd {
     }
 
     @Override
-    public void setPixel(int x, int y, Color color) throws IllegalArgumentException {
-        setPixel(x, y, !color.equals(Color.valueOf(Color.WHITE)));
-    }
-
     public void setPixel(int x, int y, boolean on) throws IllegalArgumentException {
         if (x < 0 || y < 0 || x >= getDisplayWidth() || y >= getDisplayHeight()) {
             throw new IllegalArgumentException("pixel out of bound:" + x + "," + y);
