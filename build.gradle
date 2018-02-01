@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+apply from: rootProject.file('versions-plugin.gradle')
 
 buildscript {
     repositories {
@@ -22,8 +23,9 @@ buildscript {
     dependencies {
         classpath deps.android_gradle_plugin
         classpath deps.android_checkstyle_plugin
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.0'
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
+        classpath deps.android_maven_gradle_plugin
+        classpath deps.gradle_bintray_plugin
+        classpath deps.gradle_versions_plugin
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }

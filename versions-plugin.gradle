@@ -14,11 +14,17 @@
  * limitations under the License.
  */
 
-apply plugin: 'com.leinardi.android.checkstyle'
+apply plugin: 'com.github.ben-manes.versions'
 
-checkstyle {
-    ignoreFailures = false // Whether this task will ignore failures and continue running the build.
-    configFile rootProject.file('config/checkstyle/checkstyle.xml')
-    // The Checkstyle configuration file to use.
-    toolVersion = '8.7' // The version of Checkstyle you want to be used
+dependencyUpdates.resolutionStrategy = {
+    componentSelection { rules ->
+        rules.all { ComponentSelection selection ->
+            boolean rejected = ['alpha', 'beta', 'rc', 'cr', 'm'].any { qualifier ->
+                selection.candidate.version ==~ /(?i).*[.-]${qualifier}[.\d-]*/
+            }
+            if (rejected) {
+                selection.reject('Release candidate')
+            }
+        }
+    }
 }
