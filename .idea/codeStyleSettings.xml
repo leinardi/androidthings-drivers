@@ -22,8 +22,6 @@
             <emptyLine />
             <package name="" withSubpackages="true" static="true" />
             <emptyLine />
-            <package name="de.payback" withSubpackages="true" static="false" />
-            <package name="net.payback.*" withSubpackages="true" static="false" />
           </value>
         </option>
         <option name="RIGHT_MARGIN" value="120" />
@@ -252,3 +250,4 @@
     <option name="USE_PER_PROJECT_SETTINGS" value="true" />
   </component>
 </project>
+

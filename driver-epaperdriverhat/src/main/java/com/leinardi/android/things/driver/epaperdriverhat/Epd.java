@@ -16,8 +16,6 @@
 
 package com.leinardi.android.things.driver.epaperdriverhat;
 
-import android.graphics.Color;
-
 import com.google.android.things.pio.Gpio;
 import com.google.android.things.pio.PeripheralManagerService;
 import com.google.android.things.pio.SpiDevice;
@@ -134,12 +132,12 @@ public abstract class Epd implements Closeable {
     }
 
     /**
-     * @return the width of the display
+     * Get the width of the display
      */
     public abstract int getDisplayWidth();
 
     /**
-     * @return the height of the display
+     * Get the height of the display
      */
     public abstract int getDisplayHeight();
 
