@@ -24,9 +24,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.Arrays;
 
-/**
- * Driver for controlling the EPAPERDRIVERHAT OLED display.
- */
 @SuppressWarnings("WeakerAccess")
 public abstract class Epd implements Closeable {
     private static final String TAG = Epd.class.getSimpleName();
