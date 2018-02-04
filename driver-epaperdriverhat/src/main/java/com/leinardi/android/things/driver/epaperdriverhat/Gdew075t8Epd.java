@@ -19,6 +19,9 @@ package com.leinardi.android.things.driver.epaperdriverhat;
 import java.io.IOException;
 import java.util.Arrays;
 
+/**
+ * Driver for controlling the GDEW075T8 E-Paper display.
+ */
 public class Gdew075t8Epd extends Epd {
 
     // Display resolution

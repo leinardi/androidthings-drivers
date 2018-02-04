@@ -1,13 +1,17 @@
-## E-Paper Driver HAT sample for Android Things
+## Lux sensor sample for Android Things
 
-This sample demonstrates how to control the GDEW075T8 E-Paper display using E-Paper Driver HAT with
-Android Things.
+This sample demonstrates how to control the TSL256x light-to-digital sensor
+and integrate it to the Android `SensorManager`.
+                                                           
+
 
 ## Pre-requisites
 
 - Android Things compatible board
 - Android Studio 3.1+
-- 1 [GDEW075T8 + E-Paper Driver HAT](https://www.waveshare.com/wiki/7.5inch_e-Paper_HAT)
+- 1 [TSL2561 sensor](http://ams.com/eng/Products/Light-Sensors/Ambient-Light-Sensors/TSL2561)
+- jumper wires
+- 1 breadboard
 
 
 # Build and install
@@ -17,11 +21,12 @@ On Android Studio, click on the "Run" button.
 If you prefer to run on the command line, from this repository's root directory, type
 
 ```bash
-./gradlew sample-epaperdriverhat:installDebug
-adb shell am start com.leinardi.android.things.sample.epaperdriverhat/.EpdScreenActivity
+./gradlew sample-tsl256x:installDebug
+adb shell am start com.leinardi.android.things.sample.tsl256x/.LuxActivity
 ```
 
-If you have everything set up correctly, you will see an image on the screen.
+If you have everything set up correctly, in the logcat will be printed the values
+from the accelerometer.
 
 
 ## License

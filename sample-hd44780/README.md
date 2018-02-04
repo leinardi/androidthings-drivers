@@ -6,7 +6,7 @@ Android Things.
 ## Pre-requisites
 
 - Android Things compatible board
-- Android Studio 3.0+
+- Android Studio 3.1+
 - 1 [HD44780 LCD](https://www.sparkfun.com/datasheets/LCD/HD44780.pdf)
 - 1 [PCF8574 I2C 8-bit expander](https://www.ti.com/lit/ds/symlink/pcf8574.pdf)
 - jumper wires
