@@ -4,7 +4,7 @@
 [![Build Status](https://img.shields.io/travis/leinardi/androidthings-drivers/master.svg?style=plastic)](https://travis-ci.org/leinardi/androidthings-drivers)
 [![GitHub license](https://img.shields.io/github/license/leinardi/androidthings-drivers.svg?style=plastic)](https://github.com/leinardi/androidthings-drivers/blob/master/LICENSE)
 
-This driver supports sensor peripherals built on the TSL256x chip.
+This driver supports sensor peripherals built on the TSL256x chips (TSL2560, TSL2561, TSL2562 and TSL2563).
 
 NOTE: these drivers are not production-ready. They are offered as sample
 implementations of Android Things user space drivers for common peripherals
