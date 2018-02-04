@@ -64,8 +64,8 @@ public class Tsl256xSensorDriver implements AutoCloseable {
      */
     public Tsl256xSensorDriver(String bus, int i2cAddress) throws IOException {
         mDevice = new Tsl256x(bus, i2cAddress);
-        mDevice.setAutoGain(true);
         mDevice.setIntegrationTime(Tsl256x.IntegrationTime.INTEGRATION_TIME_402MS);
+        mDevice.setAutoGain(true);
     }
 
     /**
@@ -117,7 +117,7 @@ public class Tsl256xSensorDriver implements AutoCloseable {
         private UserSensor getUserSensor() {
             if (mUserSensor == null) {
                 mUserSensor = new UserSensor.Builder()
-                        .setType(Sensor.TYPE_ACCELEROMETER)
+                        .setType(Sensor.TYPE_LIGHT)
                         .setName(DRIVER_NAME)
                         .setVendor(DRIVER_VENDOR)
                         .setVersion(DRIVER_VERSION)

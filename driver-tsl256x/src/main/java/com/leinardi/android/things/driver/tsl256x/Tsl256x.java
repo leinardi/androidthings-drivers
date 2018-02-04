@@ -33,6 +33,10 @@ import static com.leinardi.android.things.driver.tsl256x.Tsl256x.Gain.GAIN_1X;
 import static com.leinardi.android.things.driver.tsl256x.Tsl256x.IntegrationTime.INTEGRATION_TIME_101MS;
 import static com.leinardi.android.things.driver.tsl256x.Tsl256x.IntegrationTime.INTEGRATION_TIME_13_7MS;
 import static com.leinardi.android.things.driver.tsl256x.Tsl256x.IntegrationTime.INTEGRATION_TIME_402MS;
+import static com.leinardi.android.things.driver.tsl256x.Tsl256x.InterruptControl.INTERRUPT_CTRL_DISABLE;
+import static com.leinardi.android.things.driver.tsl256x.Tsl256x.InterruptControl.INTERRUPT_CTRL_LEVEL;
+import static com.leinardi.android.things.driver.tsl256x.Tsl256x.InterruptControl.INTERRUPT_CTRL_SMBALERT;
+import static com.leinardi.android.things.driver.tsl256x.Tsl256x.InterruptControl.INTERRUPT_CTRL_TEST_MODE;
 import static com.leinardi.android.things.driver.tsl256x.Tsl256x.Mode.MODE_ACTIVE;
 import static com.leinardi.android.things.driver.tsl256x.Tsl256x.Mode.MODE_STANDBY;
 import static com.leinardi.android.things.driver.tsl256x.Tsl256x.PackageType.CS;
@@ -164,6 +168,7 @@ public class Tsl256x implements Closeable {
     @PackageType
     private int mPackageType;
     private I2cDevice mDevice;
+    private boolean mAllowSleep;
 
     /**
      * Create a new TSL2561 driver connected to the given I2C bus.
@@ -224,6 +229,7 @@ public class Tsl256x implements Closeable {
         setPackageType(packageType);
         setIntegrationTime(INTEGRATION_TIME_402MS);
         setGain(GAIN_16X);
+        setAllowSleep(true);
 
         /* Note: by default, the device is in power down mode on bootup */
         setMode(MODE_STANDBY);
@@ -259,14 +265,29 @@ public class Tsl256x implements Closeable {
         mPackageType = packageType;
     }
 
+    /**
+     * Returns true if the auto-gain settings is enable, false if is disable.
+     */
     public boolean isAutoGainEnabled() {
         return mAutoGain;
     }
 
+    /**
+     * Enables or disables the auto-gain settings when reading data from the sensor.
+     *
+     * @param autoGain Set to true to enable, false to disable
+     */
     public void setAutoGain(boolean autoGain) {
         mAutoGain = autoGain;
     }
 
+    /**
+     * Sets the integration time. Higher time means more light captured (better for low light conditions) but will
+     * take longer to run readings.
+     *
+     * @param integrationTime See {@link IntegrationTime}.
+     * @throws IOException
+     */
     public void setIntegrationTime(@IntegrationTime int integrationTime) throws IOException {
         setMode(MODE_ACTIVE);
         writeRegByte(COMMAND_BIT | REGISTER_TIMING, (byte) ((integrationTime | mGain) & 0xFF));
@@ -274,6 +295,12 @@ public class Tsl256x implements Closeable {
         mIntegrationTime = integrationTime;
     }
 
+    /**
+     * Adjusts the gain (adjusts the sensitivity to light).
+     *
+     * @param gain See {@link Gain}
+     * @throws IOException
+     */
     public void setGain(@Gain int gain) throws IOException {
         setMode(MODE_ACTIVE);
         writeRegByte(COMMAND_BIT | REGISTER_TIMING, (byte) ((mIntegrationTime | gain) & 0xFF));
@@ -281,6 +308,12 @@ public class Tsl256x implements Closeable {
         mGain = gain;
     }
 
+    /**
+     * Gets the broadband (mixed lighting) and IR only values, adjusting gain if auto-gain is enabled
+     *
+     * @return an array containing the broadband (channel 0) on index 0 and IR (channel 1) on index 1.
+     * @throws IOException
+     */
     public int[] readLuminosity() throws IOException {
         setMode(MODE_ACTIVE);
         // Wait x ms for ADC to complete
@@ -433,18 +466,76 @@ public class Tsl256x implements Closeable {
      * @throws IllegalStateException
      */
     public void setMode(@Mode int mode) throws IOException, IllegalStateException {
-        writeRegByte(COMMAND_BIT | REGISTER_CONTROL, (byte) mode);
+        if (mAllowSleep || mode == MODE_ACTIVE) {
+            writeRegByte(COMMAND_BIT | REGISTER_CONTROL, (byte) mode);
+        }
+    }
+
+    public boolean isAllowSleep() {
+        return mAllowSleep;
+    }
+
+    public void setAllowSleep(boolean allowSleep) throws IOException {
+        if (!allowSleep) {
+            setMode(MODE_ACTIVE);
+        }
+        mAllowSleep = allowSleep;
     }
 
     /**
-     * Get current power mode.
+     * Sets up interrupt control.
+     * <p>
+     * Important: sleep mode must be disable. See {@link #setAllowSleep(boolean)}.
+     * <p>
+     * A persist value of 0 causes an interrupt to occur after every integration cycle regardless
+     * of the threshold settings. A value of 1 results in an interrupt after one integration
+     * time period outside the threshold window. A value of N (where N is 2 through 15) results
+     * in an interrupt only if the value remains outside the threshold window for N consecutive
+     * integration cycles. For example, if N is equal to 10 and the integration time is 402 ms,
+     * then the total time is approximately 4 seconds.
      *
+     * @param interruptControl See {@link InterruptControl}
+     * @param persist          0, every integration cycle generates an interrupt; 1, any value outside of threshold
+     *                         generates an interrupt; 2 to 15, value must be outside of threshold for 2 to 15
+     *                         integration cycles
      * @throws IOException
-     * @throws IllegalStateException
      */
-    @SuppressWarnings("ResourceType")
-    public int getMode() throws IOException, IllegalStateException {
-        return readRegByte(REGISTER_CONTROL) & MODE_ACTIVE;
+    public void setInterruptControl(@InterruptControl int interruptControl, int persist) throws IOException {
+        if (persist < 0 || persist > 0b1111) {
+            throw new IllegalArgumentException("persist must be between 0 and 15 inclusive. persist: " + persist);
+        }
+        setMode(MODE_ACTIVE);
+        writeRegByte(COMMAND_BIT | REGISTER_INTERRUPT, (byte) ((interruptControl) | (persist)));
+        // NOTE: This disables interrupts if mAllowSleep is true
+        setMode(MODE_STANDBY);
+    }
+
+    /**
+     * Sets interrupt thresholds (TSL2561 supports only interrupts generated by thresholds on channel 0).
+     * <p>
+     * Important: values supplied as thresholds are raw sensor values (see {@link #readLuminosity()}, and NOT values
+     * in the SI lux unit.
+     *
+     * @param lowThreshold
+     * @param highThreshold
+     * @throws IOException
+     */
+    public void setInterruptThreshold(short lowThreshold, short highThreshold) throws IOException {
+        setMode(MODE_ACTIVE);
+        writeRegWord(COMMAND_BIT | REGISTER_THRESHHOLDL_LOW, lowThreshold);
+        writeRegWord(COMMAND_BIT | REGISTER_THRESHHOLDH_LOW, highThreshold);
+        setMode(MODE_STANDBY);
+    }
+
+    /**
+     * Clears an active interrupt.
+     */
+    public void clearLevelInterrupt() throws IOException {
+        // Send command byte for interrupt clear
+        if (mDevice == null) {
+            throw new IllegalStateException("I2C Device not open");
+        }
+        mDevice.write(new byte[]{(byte) (COMMAND_BIT | CLEAR_BIT)}, 1);
     }
 
     private byte readRegByte(int reg) throws IOException {
@@ -468,6 +559,16 @@ public class Tsl256x implements Closeable {
         return mDevice.readRegWord(reg);
     }
 
+    private void writeRegWord(int reg, short data) throws IOException {
+        if (mDevice == null) {
+            throw new IllegalStateException("I2C Device not open");
+        }
+        mDevice.writeRegWord(reg, data);
+    }
+
+    /**
+     * The amount of time we'd like to add up values.
+     */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({INTEGRATION_TIME_13_7MS,
             INTEGRATION_TIME_101MS,
@@ -502,5 +603,30 @@ public class Tsl256x implements Closeable {
     public @interface PackageType {
         int CS = 0;
         int T_FN_CL = 3;
+    }
+
+    /**
+     * {@link #INTERRUPT_CTRL_DISABLE}: Interrupt output disabled
+     * {@link #INTERRUPT_CTRL_LEVEL}: When a level Interrupt is selected, an interrupt is generated whenever the last
+     * conversion results in a value outside of the programmed threshold window. The interrupt is active-low and
+     * remains asserted until cleared by writing the Command Register with the CLEAR bit set.
+     * {@link #INTERRUPT_CTRL_SMBALERT}: In SMBAlert mode, the interrupt is similar to the traditional level style
+     * and the interrupt line is asserted low. To clear the interrupt, the host responds to the SMBAlert by
+     * performing a modified Receive Byte operation, in which the Alert Response Address (ARA) is placed in the slave
+     * address field, and the TSL256x that generated the interrupt responds by returning its own address in the seven
+     * most significant bits of the receive data byte. If more than one device connected on the bus has pulled the
+     * SMBAlert line low, the highest priority (lowest address) device will win communication rights via standard
+     * arbitration during the slave address transfer. If the device loses this arbitration, the interrupt will not be
+     * cleared. The Alert Response Address is 0Ch.
+     * {@link #INTERRUPT_CTRL_TEST_MODE}: The interrupt is generated immediately following the SMBus write operation.
+     * Operation then behaves in an SMBAlert mode, and the software set interrupt may be cleared by an SMBAlert cycle.
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({INTERRUPT_CTRL_DISABLE, INTERRUPT_CTRL_LEVEL, INTERRUPT_CTRL_SMBALERT, INTERRUPT_CTRL_TEST_MODE})
+    public @interface InterruptControl {
+        int INTERRUPT_CTRL_DISABLE = 0b0000_0000;
+        int INTERRUPT_CTRL_LEVEL = 0b0000_0001;
+        int INTERRUPT_CTRL_SMBALERT = 0b0000_0010;
+        int INTERRUPT_CTRL_TEST_MODE = 0b0000_0011;
     }
 }
