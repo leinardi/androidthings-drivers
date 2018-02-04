@@ -8,7 +8,7 @@ and integrate it to the Android `SensorManager`.
 ## Pre-requisites
 
 - Android Things compatible board
-- Android Studio 3.0+
+- Android Studio 3.1+
 - 1 [HC-SR04 sensor](http://www.elecfreaks.com/store/hcsr04-ultrasonic-sensor-distance-measuring-module-ultra01-p-91.html)
 - jumper wires
 - 1 breadboard

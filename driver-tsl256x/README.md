@@ -31,7 +31,39 @@ dependencies {
 ### Sample usage
 
 ```java
-// TBD
+public class LuxActivity extends Activity implements SensorEventListener {
+    private static final String TAG = LuxActivity.class.getSimpleName();
+
+    private Tsl256x mTsl256x;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        try {
+            mTsl256x = new Tsl256x(BoardDefaults.getI2CPort(), 0x39);
+            mTsl256x.setGain(Tsl256x.Gain.GAIN_16X);
+            mTsl256x.setIntegrationTime(Tsl256x.IntegrationTime.INTEGRATION_TIME_402MS);
+            int[] luminosities = mTsl256x.readLuminosity();
+            Log.d(TAG, "Broadband luminosity = " + luminosities[0]);
+            Log.d(TAG, "IR luminosity = " + luminosities[1]);
+            Log.d(TAG, "Visible luminosity = " + luminosities[2]);
+            float lux = mTsl256x.readLux();
+            Log.d(TAG, "Lux = " + lux);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        try {
+            mTsl256x.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
 ```
 
 To use it with the `SensorManager` check the [sample project](https://github.com/leinardi/androidthings-drivers/tree/tsl256x/sample-tsl256x).

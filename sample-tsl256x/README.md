@@ -1,6 +1,6 @@
-## Acceleration sensor sample for Android Things
+## Lux sensor sample for Android Things
 
-This sample demonstrates how to control the TSL256x acceleration sensor
+This sample demonstrates how to control the TSL256x light-to-digital sensor
 and integrate it to the Android `SensorManager`.
                                                            
 
@@ -8,8 +8,8 @@ and integrate it to the Android `SensorManager`.
 ## Pre-requisites
 
 - Android Things compatible board
-- Android Studio 3.0+
-- 1 [TSL2561 sensor](http://www.st.com/en/mems-and-sensors/tsl256x.html)
+- Android Studio 3.1+
+- 1 [TSL2561 sensor](http://ams.com/eng/Products/Light-Sensors/Ambient-Light-Sensors/TSL2561)
 - jumper wires
 - 1 breadboard
 
@@ -22,7 +22,7 @@ If you prefer to run on the command line, from this repository's root directory,
 
 ```bash
 ./gradlew sample-tsl256x:installDebug
-adb shell am start com.leinardi.android.things.sample.tsl256x/.AccelerationActivity
+adb shell am start com.leinardi.android.things.sample.tsl256x/.LuxActivity
 ```
 
 If you have everything set up correctly, in the logcat will be printed the values

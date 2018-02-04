@@ -6,7 +6,7 @@ Android Things.
 ## Pre-requisites
 
 - Android Things compatible board
-- Android Studio 2.2+
+- Android Studio 3.1+
 - 1 [DS3231 RTC](https://www.elecrow.com/download/DS3231%20datasheet.pdf)
 - jumper wires
 - 1 breadboard

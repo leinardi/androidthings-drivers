@@ -6,7 +6,7 @@ Android Things.
 ## Pre-requisites
 
 - Android Things compatible board
-- Android Studio 2.2+
+- Android Studio 3.1+
 - 1 [GDEW075T8 + E-Paper Driver HAT](https://www.waveshare.com/wiki/7.5inch_e-Paper_HAT)
 
 

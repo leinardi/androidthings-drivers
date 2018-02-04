@@ -8,7 +8,7 @@ and integrate it to the Android `SensorManager`.
 ## Pre-requisites
 
 - Android Things compatible board
-- Android Studio 3.0+
+- Android Studio 3.1+
 - 1 [LSM9DS1 sensor](http://www.st.com/en/mems-and-sensors/lsm9ds1.html)
 - jumper wires
 - 1 breadboard

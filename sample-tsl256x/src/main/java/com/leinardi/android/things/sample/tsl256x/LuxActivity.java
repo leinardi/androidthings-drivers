@@ -25,7 +25,6 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.leinardi.android.things.driver.tsl256x.Tsl256x;
 import com.leinardi.android.things.driver.tsl256x.Tsl256xSensorDriver;
 
 import java.io.IOException;
@@ -39,7 +38,6 @@ public class LuxActivity extends Activity implements SensorEventListener {
 
     private Tsl256xSensorDriver mLightSensorDriver;
     private SensorManager mSensorManager;
-    private Tsl256x mTsl256x;
 
     private SensorManager.DynamicSensorCallback mDynamicSensorCallback = new SensorManager
             .DynamicSensorCallback() {
@@ -57,21 +55,6 @@ public class LuxActivity extends Activity implements SensorEventListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.i(TAG, "Starting LuxActivity");
-
-        //        try {
-        //            mTsl256x = new Tsl256x(BoardDefaults.getI2CPort(), 0x39);
-        //            mTsl256x.setGain(Tsl256x.Gain.GAIN_16X);
-        //            mTsl256x.setIntegrationTime(Tsl256x.IntegrationTime.INTEGRATION_TIME_402MS);
-        //            int[] luminosities = mTsl256x.readLuminosity();
-        //            Log.d(TAG, "Broadband luminosity = " + luminosities[0]);
-        //            Log.d(TAG, "IR luminosity = " + luminosities[1]);
-        //            Log.d(TAG, "Visible luminosity = " + luminosities[2]);
-        //            float lux = mTsl256x.readLux();
-        //            Log.d(TAG, "Lux = " + lux);
-        //        } catch (IOException e) {
-        //            e.printStackTrace();
-        //        }
-
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mSensorManager.registerDynamicSensorCallback(mDynamicSensorCallback);
 
@@ -87,11 +70,6 @@ public class LuxActivity extends Activity implements SensorEventListener {
     protected void onDestroy() {
         super.onDestroy();
         Log.i(TAG, "Closing sensor");
-        //        try {
-        //            mTsl256x.close();
-        //        } catch (IOException e) {
-        //            e.printStackTrace();
-        //        }
         if (mLightSensorDriver != null) {
             mSensorManager.unregisterDynamicSensorCallback(mDynamicSensorCallback);
             mSensorManager.unregisterListener(this);
