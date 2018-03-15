@@ -21,7 +21,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.google.android.things.pio.I2cDevice;
-import com.google.android.things.pio.PeripheralManagerService;
+import com.google.android.things.pio.PeripheralManager;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -224,7 +224,7 @@ public class Ds3231 implements Closeable {
      * @throws IOException
      */
     public Ds3231(String i2cName, int i2cAddress) throws IOException {
-        I2cDevice device = new PeripheralManagerService().openI2cDevice(i2cName, i2cAddress);
+        I2cDevice device = PeripheralManager.getInstance().openI2cDevice(i2cName, i2cAddress);
         try {
             connect(device);
         } catch (IOException | RuntimeException e) {

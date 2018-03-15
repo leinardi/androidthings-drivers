@@ -21,7 +21,7 @@ import android.os.SystemClock;
 import android.support.annotation.IntDef;
 
 import com.google.android.things.pio.I2cDevice;
-import com.google.android.things.pio.PeripheralManagerService;
+import com.google.android.things.pio.PeripheralManager;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -211,7 +211,7 @@ public class Lsm9ds1 implements Closeable {
      * @throws IOException
      */
     private Lsm9ds1(Builder builder) throws IOException {
-        PeripheralManagerService pioService = new PeripheralManagerService();
+        PeripheralManager pioService = PeripheralManager.getInstance();
         I2cDevice accelGyroDevice = pioService.openI2cDevice(builder.mI2cBus, builder.mI2cAddressAccelGyro);
         I2cDevice magDevice = pioService.openI2cDevice(builder.mI2cBus, builder.mI2cAddressMag);
         try {

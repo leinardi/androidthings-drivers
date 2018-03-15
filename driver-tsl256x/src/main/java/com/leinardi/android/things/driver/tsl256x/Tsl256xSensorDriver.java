@@ -19,9 +19,9 @@ package com.leinardi.android.things.driver.tsl256x;
 import android.hardware.Sensor;
 
 import com.google.android.things.userdriver.UserDriverManager;
-import com.google.android.things.userdriver.UserSensor;
-import com.google.android.things.userdriver.UserSensorDriver;
-import com.google.android.things.userdriver.UserSensorReading;
+import com.google.android.things.userdriver.sensor.UserSensor;
+import com.google.android.things.userdriver.sensor.UserSensorDriver;
+import com.google.android.things.userdriver.sensor.UserSensorReading;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -97,7 +97,7 @@ public class Tsl256xSensorDriver implements AutoCloseable {
 
         if (mLightUserDriver == null) {
             mLightUserDriver = new LightUserDriver();
-            UserDriverManager.getManager().registerSensor(mLightUserDriver.getUserSensor());
+            UserDriverManager.getInstance().registerSensor(mLightUserDriver.getUserSensor());
         }
     }
 
@@ -106,12 +106,12 @@ public class Tsl256xSensorDriver implements AutoCloseable {
      */
     public void unregisterLightSensor() {
         if (mLightUserDriver != null) {
-            UserDriverManager.getManager().unregisterSensor(mLightUserDriver.getUserSensor());
+            UserDriverManager.getInstance().unregisterSensor(mLightUserDriver.getUserSensor());
             mLightUserDriver = null;
         }
     }
 
-    private class LightUserDriver extends UserSensorDriver {
+    private class LightUserDriver implements UserSensorDriver {
         private UserSensor mUserSensor;
 
         private UserSensor getUserSensor() {

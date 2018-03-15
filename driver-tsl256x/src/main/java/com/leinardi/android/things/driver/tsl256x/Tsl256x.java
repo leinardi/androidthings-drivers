@@ -21,7 +21,7 @@ import android.support.annotation.IntDef;
 import android.util.Log;
 
 import com.google.android.things.pio.I2cDevice;
-import com.google.android.things.pio.PeripheralManagerService;
+import com.google.android.things.pio.PeripheralManager;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -178,7 +178,7 @@ public class Tsl256x implements Closeable {
      * @throws IOException
      */
     public Tsl256x(String i2cName, int i2cAddress) throws IOException {
-        PeripheralManagerService pioService = new PeripheralManagerService();
+        PeripheralManager pioService = PeripheralManager.getInstance();
         I2cDevice device = pioService.openI2cDevice(i2cName, i2cAddress);
         try {
             connect(device);
