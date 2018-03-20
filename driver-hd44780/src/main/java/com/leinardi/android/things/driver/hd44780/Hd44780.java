@@ -20,7 +20,7 @@ import android.support.annotation.IntDef;
 import android.util.Log;
 
 import com.google.android.things.pio.I2cDevice;
-import com.google.android.things.pio.PeripheralManagerService;
+import com.google.android.things.pio.PeripheralManager;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -115,7 +115,7 @@ public class Hd44780 implements AutoCloseable {
      */
     public Hd44780(String i2cName, int i2cAddress, @Geometry int geometry, boolean use5x10Dots) throws IOException {
         mLcdGeometry = GEOMETRIES[geometry];
-        I2cDevice device = new PeripheralManagerService().openI2cDevice(i2cName, i2cAddress);
+        I2cDevice device = PeripheralManager.getInstance().openI2cDevice(i2cName, i2cAddress);
         try {
             init(device, use5x10Dots);
         } catch (IOException | RuntimeException e) {

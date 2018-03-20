@@ -21,7 +21,7 @@ import android.os.HandlerThread;
 import android.util.Log;
 
 import com.google.android.things.pio.Gpio;
-import com.google.android.things.pio.PeripheralManagerService;
+import com.google.android.things.pio.PeripheralManager;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -56,7 +56,7 @@ public class Hcsr04 implements Closeable {
      * @throws IOException
      */
     public Hcsr04(String trigPin, String echoPin) throws IOException {
-        PeripheralManagerService pioService = new PeripheralManagerService();
+        PeripheralManager pioService = PeripheralManager.getInstance();
         Gpio trigGpio = pioService.openGpio(trigPin);
         Gpio echoGpio = pioService.openGpio(echoPin);
         try {

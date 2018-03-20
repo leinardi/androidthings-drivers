@@ -19,9 +19,9 @@ package com.leinardi.android.things.driver.lsm9ds1;
 import android.hardware.Sensor;
 
 import com.google.android.things.userdriver.UserDriverManager;
-import com.google.android.things.userdriver.UserSensor;
-import com.google.android.things.userdriver.UserSensorDriver;
-import com.google.android.things.userdriver.UserSensorReading;
+import com.google.android.things.userdriver.sensor.UserSensor;
+import com.google.android.things.userdriver.sensor.UserSensorDriver;
+import com.google.android.things.userdriver.sensor.UserSensorReading;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -110,7 +110,7 @@ public class Lsm9ds1SensorDriver implements AutoCloseable {
 
         if (mAccelerationUserDriver == null) {
             mAccelerationUserDriver = new AccelerationUserDriver();
-            UserDriverManager.getManager().registerSensor(mAccelerationUserDriver.getUserSensor());
+            UserDriverManager.getInstance().registerSensor(mAccelerationUserDriver.getUserSensor());
         }
     }
 
@@ -119,7 +119,7 @@ public class Lsm9ds1SensorDriver implements AutoCloseable {
      */
     public void unregisterAccelerometerSensor() {
         if (mAccelerationUserDriver != null) {
-            UserDriverManager.getManager().unregisterSensor(mAccelerationUserDriver.getUserSensor());
+            UserDriverManager.getInstance().unregisterSensor(mAccelerationUserDriver.getUserSensor());
             mAccelerationUserDriver = null;
         }
     }
@@ -136,7 +136,7 @@ public class Lsm9ds1SensorDriver implements AutoCloseable {
 
         if (mAngularVelocityUserDriver == null) {
             mAngularVelocityUserDriver = new AngularVelocityUserDriver();
-            UserDriverManager.getManager().registerSensor(mAngularVelocityUserDriver.getUserSensor());
+            UserDriverManager.getInstance().registerSensor(mAngularVelocityUserDriver.getUserSensor());
         }
     }
 
@@ -145,7 +145,7 @@ public class Lsm9ds1SensorDriver implements AutoCloseable {
      */
     public void unregisterGyroscopeSensor() {
         if (mAngularVelocityUserDriver != null) {
-            UserDriverManager.getManager().unregisterSensor(mAngularVelocityUserDriver.getUserSensor());
+            UserDriverManager.getInstance().unregisterSensor(mAngularVelocityUserDriver.getUserSensor());
             mAngularVelocityUserDriver = null;
         }
     }
@@ -162,7 +162,7 @@ public class Lsm9ds1SensorDriver implements AutoCloseable {
 
         if (mMagneticInductionUserDriver == null) {
             mMagneticInductionUserDriver = new MagneticInductionUserDriver();
-            UserDriverManager.getManager().registerSensor(mMagneticInductionUserDriver.getUserSensor());
+            UserDriverManager.getInstance().registerSensor(mMagneticInductionUserDriver.getUserSensor());
         }
     }
 
@@ -171,7 +171,7 @@ public class Lsm9ds1SensorDriver implements AutoCloseable {
      */
     public void unregisterMagneticFieldSensor() {
         if (mMagneticInductionUserDriver != null) {
-            UserDriverManager.getManager().unregisterSensor(mMagneticInductionUserDriver.getUserSensor());
+            UserDriverManager.getInstance().unregisterSensor(mMagneticInductionUserDriver.getUserSensor());
             mMagneticInductionUserDriver = null;
         }
     }
@@ -188,7 +188,7 @@ public class Lsm9ds1SensorDriver implements AutoCloseable {
 
         if (mTemperatureUserDriver == null) {
             mTemperatureUserDriver = new TemperatureUserDriver();
-            UserDriverManager.getManager().registerSensor(mTemperatureUserDriver.getUserSensor());
+            UserDriverManager.getInstance().registerSensor(mTemperatureUserDriver.getUserSensor());
         }
     }
 
@@ -197,7 +197,7 @@ public class Lsm9ds1SensorDriver implements AutoCloseable {
      */
     public void unregisterTemperatureSensor() {
         if (mTemperatureUserDriver != null) {
-            UserDriverManager.getManager().unregisterSensor(mTemperatureUserDriver.getUserSensor());
+            UserDriverManager.getInstance().unregisterSensor(mTemperatureUserDriver.getUserSensor());
             mTemperatureUserDriver = null;
         }
     }
@@ -249,7 +249,7 @@ public class Lsm9ds1SensorDriver implements AutoCloseable {
         }
     }
 
-    private class AccelerationUserDriver extends UserSensorDriver {
+    private class AccelerationUserDriver implements UserSensorDriver {
         // DRIVER parameters
         // documented at https://source.android.com/devices/sensors/hal-interface.html#sensor_t
         private static final float DRIVER_MAX_RANGE = Lsm9ds1.MAX_ACCEL_RANGE_G_DEFAULT;
@@ -296,7 +296,7 @@ public class Lsm9ds1SensorDriver implements AutoCloseable {
         }
     }
 
-    private class AngularVelocityUserDriver extends UserSensorDriver {
+    private class AngularVelocityUserDriver implements UserSensorDriver {
         // DRIVER parameters
         // documented at https://source.android.com/devices/sensors/hal-interface.html#sensor_t
         private static final float DRIVER_MAX_RANGE = Lsm9ds1.MAX_GYRO_RATE_DPS_DEFAULT;
@@ -343,7 +343,7 @@ public class Lsm9ds1SensorDriver implements AutoCloseable {
         }
     }
 
-    private class MagneticInductionUserDriver extends UserSensorDriver {
+    private class MagneticInductionUserDriver implements UserSensorDriver {
         // DRIVER parameters
         // documented at https://source.android.com/devices/sensors/hal-interface.html#sensor_t
         private static final float DRIVER_MAX_RANGE = Lsm9ds1.MAX_MAG_GAIN_GS_DEFAULT;
@@ -390,7 +390,7 @@ public class Lsm9ds1SensorDriver implements AutoCloseable {
         }
     }
 
-    private class TemperatureUserDriver extends UserSensorDriver {
+    private class TemperatureUserDriver implements UserSensorDriver {
         // DRIVER parameters
         // documented at https://source.android.com/devices/sensors/hal-interface.html#sensor_t
         private static final float DRIVER_MAX_RANGE = Lsm9ds1.MAX_TEMP_C;

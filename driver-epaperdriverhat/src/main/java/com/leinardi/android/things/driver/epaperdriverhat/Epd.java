@@ -17,7 +17,7 @@
 package com.leinardi.android.things.driver.epaperdriverhat;
 
 import com.google.android.things.pio.Gpio;
-import com.google.android.things.pio.PeripheralManagerService;
+import com.google.android.things.pio.PeripheralManager;
 import com.google.android.things.pio.SpiDevice;
 
 import java.io.Closeable;
@@ -60,7 +60,7 @@ public abstract class Epd implements Closeable {
     }
 
     public Epd(String spiBusPort, String resetPin, String dataCommandPin, String busyPin) throws IOException {
-        PeripheralManagerService pioService = new PeripheralManagerService();
+        PeripheralManager pioService = PeripheralManager.getInstance();
         mSpiDevice = pioService.openSpiDevice(spiBusPort);
         mResetPin = pioService.openGpio(resetPin);
         mDataCommandPin = pioService.openGpio(dataCommandPin);

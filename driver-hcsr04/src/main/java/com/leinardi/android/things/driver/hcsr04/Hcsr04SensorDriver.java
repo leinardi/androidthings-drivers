@@ -19,9 +19,9 @@ package com.leinardi.android.things.driver.hcsr04;
 import android.hardware.Sensor;
 
 import com.google.android.things.userdriver.UserDriverManager;
-import com.google.android.things.userdriver.UserSensor;
-import com.google.android.things.userdriver.UserSensorDriver;
-import com.google.android.things.userdriver.UserSensorReading;
+import com.google.android.things.userdriver.sensor.UserSensor;
+import com.google.android.things.userdriver.sensor.UserSensorDriver;
+import com.google.android.things.userdriver.sensor.UserSensorReading;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -83,7 +83,7 @@ public class Hcsr04SensorDriver implements AutoCloseable {
 
         if (mDistanceUserDriver == null) {
             mDistanceUserDriver = new DistanceUserDriver();
-            UserDriverManager.getManager().registerSensor(mDistanceUserDriver.getUserSensor());
+            UserDriverManager.getInstance().registerSensor(mDistanceUserDriver.getUserSensor());
         }
     }
 
@@ -92,12 +92,12 @@ public class Hcsr04SensorDriver implements AutoCloseable {
      */
     public void unregisterProximitySensor() {
         if (mDistanceUserDriver != null) {
-            UserDriverManager.getManager().unregisterSensor(mDistanceUserDriver.getUserSensor());
+            UserDriverManager.getInstance().unregisterSensor(mDistanceUserDriver.getUserSensor());
             mDistanceUserDriver = null;
         }
     }
 
-    private class DistanceUserDriver extends UserSensorDriver {
+    private class DistanceUserDriver implements UserSensorDriver {
         private UserSensor mUserSensor;
 
         private UserSensor getUserSensor() {

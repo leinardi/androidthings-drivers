@@ -60,7 +60,7 @@ public class Ds3231Receiver extends BroadcastReceiver {
                 // Otherwise, set the DS3231 using the system time if the system time appears sane
                 if (isSaneTimestamp(ds3231Timestamp)) {
                     Log.i(TAG, "Setting system clock using DS3231");
-                    TimeManager timeManager = new TimeManager();
+                    TimeManager timeManager = TimeManager.getInstance();
                     timeManager.setTime(ds3231Timestamp);
 
                     // Re-enable NTP updates.  The call to setTime() disables them automatically,
