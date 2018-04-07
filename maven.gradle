@@ -69,3 +69,5 @@ artifacts {
     archives javadocJar
     archives sourcesJar
 }
+
+apply from: rootProject.file('bintray.gradle')

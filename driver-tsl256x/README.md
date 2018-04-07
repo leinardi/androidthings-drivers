@@ -41,7 +41,7 @@ public class LuxActivity extends Activity implements SensorEventListener {
         super.onCreate(savedInstanceState);
         try {
             mTsl256x = new Tsl256x(BoardDefaults.getI2CPort(), 0x39);
-            mTsl256x.setGain(Tsl256x.Gain.GAIN_16X);
+            mTsl256x.setAutoGain(true);
             mTsl256x.setIntegrationTime(Tsl256x.IntegrationTime.INTEGRATION_TIME_402MS);
             int[] luminosities = mTsl256x.readLuminosity();
             Log.d(TAG, "Broadband luminosity = " + luminosities[0]);
