@@ -19,7 +19,6 @@ package com.leinardi.android.things.driver.ds3231.receiver;
 import android.os.Build;
 import android.util.Log;
 
-
 @SuppressWarnings("WeakerAccess")
 public class BoardDefaults {
     private static final String TAG = BoardDefaults.class.getSimpleName();
