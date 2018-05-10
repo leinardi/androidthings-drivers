@@ -38,7 +38,6 @@ public class Ds3231SensorDriver implements AutoCloseable {
     private static final float DRIVER_POWER = Ds3231.MAX_POWER_CONSUMPTION_UA / 1000.f;
     private static final float DRIVER_RESOLUTION = Ds3231.TEMPERATURE_RESOLUTION;
     private static final int DRIVER_VERSION = 1;
-    private static final String DRIVER_REQUIRED_PERMISSION = "";
 
     private Ds3231 mDevice;
 
@@ -125,7 +124,6 @@ public class Ds3231SensorDriver implements AutoCloseable {
                         .setPower(DRIVER_POWER)
                         .setMinDelay(DRIVER_MIN_DELAY_US)
                         .setMaxDelay(DRIVER_MAX_DELAY_US)
-                        .setRequiredPermission(DRIVER_REQUIRED_PERMISSION)
                         .setUuid(UUID.randomUUID())
                         .setDriver(this)
                         .build();

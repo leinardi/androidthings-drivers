@@ -17,7 +17,7 @@ apply from: rootProject.file('versions-plugin.gradle')
 
 buildscript {
     repositories {
-        apply from: 'versions.gradle'
+        apply from: 'dependencies.gradle'
         addRepos(repositories)
     }
     dependencies {

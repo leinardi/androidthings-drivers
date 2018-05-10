@@ -68,7 +68,6 @@ public class ClockActivity extends Activity {
             Log.e(TAG, "Error while opening screen", e);
             throw new RuntimeException(e);
         }
-        Log.d(TAG, "OLED screen activity created");
     }
 
     @Override

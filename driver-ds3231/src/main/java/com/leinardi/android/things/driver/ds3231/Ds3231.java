@@ -435,8 +435,9 @@ public class Ds3231 implements Closeable {
      * <p>
      * It is set to false when power is first applied.
      *
-     * @param enabled When set to true with {@link #isInterruptControlEnable()} equals false and V CC < V PF , it
-     *                enables the square wave. When false, the INT/SQW pin goes high impedance when V CC < V PF.
+     * @param enabled When set to true with {@link #isInterruptControlEnable()} equals false and V CC lower than V
+     *                PFm, it enables the square wave. When false, the INT/SQW pin goes high impedance when V CC is
+     *                lower than V PF.
      * @throws IOException
      */
     public void setSquareWave(boolean enabled) throws IOException {

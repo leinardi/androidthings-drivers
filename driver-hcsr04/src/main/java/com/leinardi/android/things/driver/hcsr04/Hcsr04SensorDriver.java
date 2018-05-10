@@ -37,7 +37,6 @@ public class Hcsr04SensorDriver implements AutoCloseable {
     private static final float DRIVER_POWER = Hcsr04.MAX_POWER_CONSUMPTION_UA / 1000.f;
     private static final float DRIVER_RESOLUTION = Hcsr04.ACCURACY;
     private static final int DRIVER_VERSION = 1;
-    private static final String DRIVER_REQUIRED_PERMISSION = "";
 
     private Hcsr04 mDevice;
 
@@ -112,7 +111,6 @@ public class Hcsr04SensorDriver implements AutoCloseable {
                         .setPower(DRIVER_POWER)
                         .setMinDelay(DRIVER_MIN_DELAY_US)
                         .setMaxDelay(DRIVER_MAX_DELAY_US)
-                        .setRequiredPermission(DRIVER_REQUIRED_PERMISSION)
                         .setUuid(UUID.randomUUID())
                         .setDriver(this)
                         .build();

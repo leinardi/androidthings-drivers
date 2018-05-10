@@ -74,7 +74,6 @@ public class BitmapHelper {
      * @param offset    The byte offset to start writing screen bitmap data at.
      * @param bmp       The bitmap image that you want to convert to screen data.
      * @param drawWhite Set to true to draw white pixels, false to draw pixels based on gradient.
-     * @return A byte array with pixel data for the SH1106.
      */
     public static void bmpToBytes(byte[][] buffer, int offset, Bitmap bmp, boolean drawWhite) {
         int width = bmp.getWidth();

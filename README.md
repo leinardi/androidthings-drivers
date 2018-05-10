@@ -19,13 +19,13 @@ For your convenience, drivers in this repository are also published to JCenter
 as Maven artifacts. Look at their artifact and group ID in their build.gradle
 and add them as dependencies to your own project.
 
-For example, to use the `sh1106` driver, version `0.2`, simply add the line
+For example, to use the `sh1106` driver, version `1.0`, simply add the line
 below to your project's `build.gradle`:
 
 
 ```
 dependencies {
-    compile 'com.leinardi.android.things:driver-sh1106:0.2'
+    compile 'com.leinardi.android.things:driver-sh1106:1.0'
 }
 ```
 
@@ -35,13 +35,13 @@ dependencies {
 <!-- DRIVER_LIST_START -->
 Driver | Type | Usage (add to your gradle dependencies) | Note
 :---:|:---:| --- | ---
-[driver-ds3231](driver-ds3231) | real-time clock (RTC) | `implementation 'com.leinardi.android.things:driver-ds3231:0.2'` | [![Maven metadata URI](https://img.shields.io/maven-metadata/v/http/jcenter.bintray.com/com/leinardi/android/things/driver-ds3231/maven-metadata.xml.svg)](https://jcenter.bintray.com/com/leinardi/android/things/driver-ds3231/maven-metadata.xml) [changelog](driver-ds3231/CHANGELOG.md) [sample](sample-ds3231) [driver-ds3231-receiver](driver-ds3231-receiver)
-[driver-epaperdriverhat](driver-epaperdriverhat) | E-Paper Driver HAT | `implementation 'com.leinardi.android.things:driver-epaperdriverhat:0.2'` | [![Maven metadata URI](https://img.shields.io/maven-metadata/v/http/jcenter.bintray.com/com/leinardi/android/things/driver-epaperdriverhat/maven-metadata.xml.svg)](https://jcenter.bintray.com/com/leinardi/android/things/driver-epaperdriverhat/maven-metadata.xml) [changelog](driver-epaperdriverhat/CHANGELOG.md) [sample](sample-epaperdriverhat)
-[driver-hcsr04](driver-hcsr04) | ultrasonic ranging module | `implementation 'com.leinardi.android.things:driver-hcsr04:0.2'` | [![Maven metadata URI](https://img.shields.io/maven-metadata/v/http/jcenter.bintray.com/com/leinardi/android/things/driver-hcsr04/maven-metadata.xml.svg)](https://jcenter.bintray.com/com/leinardi/android/things/driver-hcsr04/maven-metadata.xml) [changelog](driver-hcsr04/CHANGELOG.md) [sample](sample-hcsr04)
-[driver-hd44780](driver-hd44780) | alphanumeric dot matrix LCD | `implementation 'com.leinardi.android.things:driver-hd44780:0.3'` | [![Maven metadata URI](https://img.shields.io/maven-metadata/v/http/jcenter.bintray.com/com/leinardi/android/things/driver-hd44780/maven-metadata.xml.svg)](https://jcenter.bintray.com/com/leinardi/android/things/driver-hd44780/maven-metadata.xml) [changelog](driver-hd44780/CHANGELOG.md) [sample](sample-hd44780)
-[driver-lsm9ds1](driver-lsm9ds1) | 3D accelerometer, 3D gyroscope, 3D magnetometer and temperature sensor | `implementation 'com.leinardi.android.things:driver-lsm9ds1:0.4'` | [![Maven metadata URI](https://img.shields.io/maven-metadata/v/http/jcenter.bintray.com/com/leinardi/android/things/driver-lsm9ds1/maven-metadata.xml.svg)](https://jcenter.bintray.com/com/leinardi/android/things/driver-lsm9ds1/maven-metadata.xml) [changelog](driver-lsm9ds1/CHANGELOG.md) [sample](sample-lsm9ds1)
-[driver-sh1106](driver-sh1106) | OLED display | `implementation 'com.leinardi.android.things:driver-sh1106:0.3'` | [![Maven metadata URI](https://img.shields.io/maven-metadata/v/http/jcenter.bintray.com/com/leinardi/android/things/driver-sh1106/maven-metadata.xml.svg)](https://jcenter.bintray.com/com/leinardi/android/things/driver-sh1106/maven-metadata.xml) [changelog](driver-sh1106/CHANGELOG.md) [sample](sample-sh1106)
-[driver-tsl256x](driver-tsl256x) | light-to-digital converter | `implementation 'com.leinardi.android.things:driver-tsl256x:0.2'` | [![Maven metadata URI](https://img.shields.io/maven-metadata/v/http/jcenter.bintray.com/com/leinardi/android/things/driver-tsl256x/maven-metadata.xml.svg)](https://jcenter.bintray.com/com/leinardi/android/things/driver-tsl256x/maven-metadata.xml) [changelog](driver-tsl256x/CHANGELOG.md) [sample](sample-tsl256x)
+[driver-ds3231](driver-ds3231) | real-time clock (RTC) | `implementation 'com.leinardi.android.things:driver-ds3231:1.0'` | [![Maven metadata URI](https://img.shields.io/maven-metadata/v/http/jcenter.bintray.com/com/leinardi/android/things/driver-ds3231/maven-metadata.xml.svg)](https://jcenter.bintray.com/com/leinardi/android/things/driver-ds3231/maven-metadata.xml) [changelog](driver-ds3231/CHANGELOG.md) [sample](sample-ds3231) [driver-ds3231-receiver](driver-ds3231-receiver)
+[driver-epaperdriverhat](driver-epaperdriverhat) | E-Paper Driver HAT | `implementation 'com.leinardi.android.things:driver-epaperdriverhat:1.0'` | [![Maven metadata URI](https://img.shields.io/maven-metadata/v/http/jcenter.bintray.com/com/leinardi/android/things/driver-epaperdriverhat/maven-metadata.xml.svg)](https://jcenter.bintray.com/com/leinardi/android/things/driver-epaperdriverhat/maven-metadata.xml) [changelog](driver-epaperdriverhat/CHANGELOG.md) [sample](sample-epaperdriverhat)
+[driver-hcsr04](driver-hcsr04) | ultrasonic ranging module | `implementation 'com.leinardi.android.things:driver-hcsr04:1.0'` | [![Maven metadata URI](https://img.shields.io/maven-metadata/v/http/jcenter.bintray.com/com/leinardi/android/things/driver-hcsr04/maven-metadata.xml.svg)](https://jcenter.bintray.com/com/leinardi/android/things/driver-hcsr04/maven-metadata.xml) [changelog](driver-hcsr04/CHANGELOG.md) [sample](sample-hcsr04)
+[driver-hd44780](driver-hd44780) | alphanumeric dot matrix LCD | `implementation 'com.leinardi.android.things:driver-hd44780:1.0'` | [![Maven metadata URI](https://img.shields.io/maven-metadata/v/http/jcenter.bintray.com/com/leinardi/android/things/driver-hd44780/maven-metadata.xml.svg)](https://jcenter.bintray.com/com/leinardi/android/things/driver-hd44780/maven-metadata.xml) [changelog](driver-hd44780/CHANGELOG.md) [sample](sample-hd44780)
+[driver-lsm9ds1](driver-lsm9ds1) | 3D accelerometer, 3D gyroscope, 3D magnetometer and temperature sensor | `implementation 'com.leinardi.android.things:driver-lsm9ds1:1.0'` | [![Maven metadata URI](https://img.shields.io/maven-metadata/v/http/jcenter.bintray.com/com/leinardi/android/things/driver-lsm9ds1/maven-metadata.xml.svg)](https://jcenter.bintray.com/com/leinardi/android/things/driver-lsm9ds1/maven-metadata.xml) [changelog](driver-lsm9ds1/CHANGELOG.md) [sample](sample-lsm9ds1)
+[driver-sh1106](driver-sh1106) | OLED display | `implementation 'com.leinardi.android.things:driver-sh1106:1.0'` | [![Maven metadata URI](https://img.shields.io/maven-metadata/v/http/jcenter.bintray.com/com/leinardi/android/things/driver-sh1106/maven-metadata.xml.svg)](https://jcenter.bintray.com/com/leinardi/android/things/driver-sh1106/maven-metadata.xml) [changelog](driver-sh1106/CHANGELOG.md) [sample](sample-sh1106)
+[driver-tsl256x](driver-tsl256x) | light-to-digital converter | `implementation 'com.leinardi.android.things:driver-tsl256x:1.0'` | [![Maven metadata URI](https://img.shields.io/maven-metadata/v/http/jcenter.bintray.com/com/leinardi/android/things/driver-tsl256x/maven-metadata.xml.svg)](https://jcenter.bintray.com/com/leinardi/android/things/driver-tsl256x/maven-metadata.xml) [changelog](driver-tsl256x/CHANGELOG.md) [sample](sample-tsl256x)
 <!-- DRIVER_LIST_END -->
 
 ## Change of group ID and package name
