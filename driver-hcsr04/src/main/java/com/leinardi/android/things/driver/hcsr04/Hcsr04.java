@@ -145,8 +145,6 @@ public class Hcsr04 implements Closeable {
 
     /**
      * Close the driver and the underlying device.
-     *
-     * @throws IOException
      */
     @Override
     public void close() {
