@@ -29,7 +29,7 @@ mvn_config.githubRepo = 'leinardi/androidthings-drivers'
 mvn_config.inception_year = '2018'
 mvn_config.dryRun = false
 mvn_config.publish = false
-mvn_config.override = true
+mvn_config.override = false
 
 ext.mvn_config = mvn_config
 
