@@ -37,7 +37,6 @@ public class Tsl256xSensorDriver implements AutoCloseable {
     private static final float DRIVER_MAX_RANGE = Tsl256x.MAX_RANGE_LUX;
     private static final float DRIVER_POWER = Tsl256x.MAX_POWER_CONSUMPTION_UA / 1000.f;
     private static final int DRIVER_VERSION = 1;
-    private static final String DRIVER_REQUIRED_PERMISSION = "";
 
     private Tsl256x mDevice;
 
@@ -125,7 +124,6 @@ public class Tsl256xSensorDriver implements AutoCloseable {
                         .setPower(DRIVER_POWER)
                         .setMinDelay(DRIVER_XG_MIN_DELAY_US)
                         .setMaxDelay(DRIVER_XG_MAX_DELAY_US)
-                        .setRequiredPermission(DRIVER_REQUIRED_PERMISSION)
                         .setUuid(UUID.randomUUID())
                         .setDriver(this)
                         .build();

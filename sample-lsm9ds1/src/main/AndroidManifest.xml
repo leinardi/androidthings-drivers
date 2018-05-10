@@ -19,6 +19,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="com.google.android.things.permission.USE_PERIPHERAL_IO" />
     <uses-permission android:name="com.google.android.things.permission.MANAGE_SENSOR_DRIVERS" />
 
     <application
@@ -36,13 +37,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- Launch activity automatically on boot -->
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.IOT_LAUNCHER" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
+            <!--
+              Uncomment the following intent filter block to enable this activity to
+              launch automatically on boot, and re-launch if the app terminates.
+            -->
+            <!--
+                        <intent-filter>
+                            <action android:name="android.intent.action.MAIN"/>
+                            <category android:name="android.intent.category.HOME"/>
+                            <category android:name="android.intent.category.DEFAULT"/>
+                        </intent-filter>
+            -->
         </activity>
     </application>
 
