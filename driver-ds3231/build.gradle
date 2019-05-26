@@ -47,7 +47,7 @@ android {
 
 dependencies {
     compileOnly "com.google.android.things:androidthings:$versions.androidthings"
-    implementation "com.android.support:support-annotations:$versions.support"
+    implementation "androidx.annotation:annotation:$versions.androidx_annotations"
 
     testImplementation "com.google.android.things:androidthings:$versions.androidthings"
     testImplementation "org.powermock:powermock-module-junit4:$versions.powermock"

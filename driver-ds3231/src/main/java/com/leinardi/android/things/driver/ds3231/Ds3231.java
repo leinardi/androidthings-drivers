@@ -16,10 +16,10 @@
 
 package com.leinardi.android.things.driver.ds3231;
 
-import android.support.annotation.IntDef;
-import android.support.annotation.Nullable;
 import android.util.Log;
 
+import androidx.annotation.IntDef;
+import androidx.annotation.Nullable;
 import com.google.android.things.pio.I2cDevice;
 import com.google.android.things.pio.PeripheralManager;
 

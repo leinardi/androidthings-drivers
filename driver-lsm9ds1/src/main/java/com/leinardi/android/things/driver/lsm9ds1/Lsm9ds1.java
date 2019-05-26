@@ -18,8 +18,8 @@ package com.leinardi.android.things.driver.lsm9ds1;
 
 import android.hardware.SensorManager;
 import android.os.SystemClock;
-import android.support.annotation.IntDef;
 
+import androidx.annotation.IntDef;
 import com.google.android.things.pio.I2cDevice;
 import com.google.android.things.pio.PeripheralManager;
 
@@ -58,21 +58,17 @@ import static com.leinardi.android.things.driver.lsm9ds1.Lsm9ds1.MagnetometerGai
 import static com.leinardi.android.things.driver.lsm9ds1.Lsm9ds1.MagnetometerGain.MAG_GAIN_16GAUSS;
 import static com.leinardi.android.things.driver.lsm9ds1.Lsm9ds1.MagnetometerGain.MAG_GAIN_4GAUSS;
 import static com.leinardi.android.things.driver.lsm9ds1.Lsm9ds1.MagnetometerGain.MAG_GAIN_8GAUSS;
-import static com.leinardi.android.things.driver.lsm9ds1.Lsm9ds1.MagnetometerSystemOperatingMode
-        .MAG_CONTINUOUS_CONVERSION;
+import static com.leinardi.android.things.driver.lsm9ds1.Lsm9ds1.MagnetometerSystemOperatingMode.MAG_CONTINUOUS_CONVERSION;
 import static com.leinardi.android.things.driver.lsm9ds1.Lsm9ds1.MagnetometerSystemOperatingMode.MAG_POWER_DOWN;
 import static com.leinardi.android.things.driver.lsm9ds1.Lsm9ds1.MagnetometerSystemOperatingMode.MAG_SINGLE_CONVERSION;
 import static com.leinardi.android.things.driver.lsm9ds1.Lsm9ds1.MagnetometerXYOperatingMode.MAG_XY_OM_HIGH_PERFORMANCE;
 import static com.leinardi.android.things.driver.lsm9ds1.Lsm9ds1.MagnetometerXYOperatingMode.MAG_XY_OM_LOW_POWER;
-import static com.leinardi.android.things.driver.lsm9ds1.Lsm9ds1.MagnetometerXYOperatingMode
-        .MAG_XY_OM_MEDIUM_PERFORMANCE;
-import static com.leinardi.android.things.driver.lsm9ds1.Lsm9ds1.MagnetometerXYOperatingMode
-        .MAG_XY_OM_ULTRA_HIGH_PERFORMANCE;
+import static com.leinardi.android.things.driver.lsm9ds1.Lsm9ds1.MagnetometerXYOperatingMode.MAG_XY_OM_MEDIUM_PERFORMANCE;
+import static com.leinardi.android.things.driver.lsm9ds1.Lsm9ds1.MagnetometerXYOperatingMode.MAG_XY_OM_ULTRA_HIGH_PERFORMANCE;
 import static com.leinardi.android.things.driver.lsm9ds1.Lsm9ds1.MagnetometerZOperatingMode.MAG_Z_OM_HIGH_PERFORMANCE;
 import static com.leinardi.android.things.driver.lsm9ds1.Lsm9ds1.MagnetometerZOperatingMode.MAG_Z_OM_LOW_POWER;
 import static com.leinardi.android.things.driver.lsm9ds1.Lsm9ds1.MagnetometerZOperatingMode.MAG_Z_OM_MEDIUM_PERFORMANCE;
-import static com.leinardi.android.things.driver.lsm9ds1.Lsm9ds1.MagnetometerZOperatingMode
-        .MAG_Z_OM_ULTRA_HIGH_PERFORMANCE;
+import static com.leinardi.android.things.driver.lsm9ds1.Lsm9ds1.MagnetometerZOperatingMode.MAG_Z_OM_ULTRA_HIGH_PERFORMANCE;
 import static com.leinardi.android.things.driver.lsm9ds1.Lsm9ds1.SensorType.SENSOR_MAG;
 import static com.leinardi.android.things.driver.lsm9ds1.Lsm9ds1.SensorType.SENSOR_XG;
 

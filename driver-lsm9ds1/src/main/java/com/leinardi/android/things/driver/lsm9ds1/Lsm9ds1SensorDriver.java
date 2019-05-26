@@ -28,8 +28,7 @@ import java.util.UUID;
 
 import static com.leinardi.android.things.driver.lsm9ds1.Lsm9ds1.AccelGyroOutputDataRate.ODR_952HZ;
 import static com.leinardi.android.things.driver.lsm9ds1.Lsm9ds1.AccelGyroOutputDataRate.ODR_POWER_DOWN;
-import static com.leinardi.android.things.driver.lsm9ds1.Lsm9ds1.MagnetometerSystemOperatingMode
-        .MAG_CONTINUOUS_CONVERSION;
+import static com.leinardi.android.things.driver.lsm9ds1.Lsm9ds1.MagnetometerSystemOperatingMode.MAG_CONTINUOUS_CONVERSION;
 import static com.leinardi.android.things.driver.lsm9ds1.Lsm9ds1.MagnetometerSystemOperatingMode.MAG_POWER_DOWN;
 
 public class Lsm9ds1SensorDriver implements AutoCloseable {

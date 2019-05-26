@@ -17,9 +17,9 @@
 package com.leinardi.android.things.driver.tsl256x;
 
 import android.os.SystemClock;
-import android.support.annotation.IntDef;
 import android.util.Log;
 
+import androidx.annotation.IntDef;
 import com.google.android.things.pio.I2cDevice;
 import com.google.android.things.pio.PeripheralManager;
 
