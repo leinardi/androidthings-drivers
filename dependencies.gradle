@@ -31,8 +31,8 @@ versions.androidx_annotations = "1.0.0"
 ext.versions = versions
 
 def build_versions = [:]
-build_versions.min_sdk = 28
-build_versions.target_sdk = 28
+build_versions.min_sdk = 27
+build_versions.target_sdk = 27
 build_versions.java_version = JavaVersion.VERSION_1_7
 build_versions.version_code = 'git rev-list --count HEAD'.execute().text.trim() as int
 ext.build_versions = build_versions
