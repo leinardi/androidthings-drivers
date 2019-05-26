@@ -19,7 +19,6 @@ apply from: rootProject.file('checkstyle.gradle')
 
 android {
     compileSdkVersion build_versions.target_sdk
-    buildToolsVersion build_versions.build_tools
 
     apply from: 'mavenConfig.gradle'
 
@@ -46,6 +45,6 @@ android {
 }
 
 dependencies {
-    compileOnly deps.androidthings
-    implementation deps.support.annotations
+    compileOnly "com.google.android.things:androidthings:$versions.androidthings"
+    implementation "com.android.support:support-annotations:$versions.support"
 }

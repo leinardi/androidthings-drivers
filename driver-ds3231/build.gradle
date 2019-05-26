@@ -20,7 +20,6 @@ apply from: rootProject.file('checkstyle.gradle')
 
 android {
     compileSdkVersion build_versions.target_sdk
-    buildToolsVersion build_versions.build_tools
 
     apply from: 'mavenConfig.gradle'
 
@@ -47,10 +46,10 @@ android {
 }
 
 dependencies {
-    compileOnly deps.androidthings
-    implementation deps.support.annotations
+    compileOnly "com.google.android.things:androidthings:$versions.androidthings"
+    implementation "com.android.support:support-annotations:$versions.support"
 
-    testImplementation deps.androidthings
-    testImplementation deps.powermock.module_junit4
-    testImplementation deps.powermock.api_mockito
+    testImplementation "com.google.android.things:androidthings:$versions.androidthings"
+    testImplementation "org.powermock:powermock-module-junit4:$versions.powermock"
+    testImplementation "org.powermock:powermock-api-mockito2:$versions.powermock"
 }

@@ -19,7 +19,6 @@ apply from: rootProject.file('checkstyle.gradle')
 
 android {
     compileSdkVersion build_versions.target_sdk
-    buildToolsVersion build_versions.build_tools
 
     defaultConfig {
         applicationId "com.leinardi.android.things.sample.tsl256x"
@@ -47,8 +46,8 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    compileOnly deps.androidthings
-    implementation deps.support.annotations
+    compileOnly "com.google.android.things:androidthings:$versions.androidthings"
+    implementation "com.android.support:support-annotations:$versions.support"
     implementation project(':driver-tsl256x')
 
 }

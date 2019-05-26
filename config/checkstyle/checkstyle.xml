@@ -21,7 +21,7 @@
 <module name="Checker">
 
     <module name="SuppressionFilter">
-        <property name="file" value="config/checkstyle/checkstyle-suppressions.xml" />
+        <property name="file" value="${config_loc}/suppressions.xml" />
     </module>
 
     <!-- Checks that a package-info.java file exists for each package.     -->
